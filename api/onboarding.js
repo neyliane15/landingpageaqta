@@ -258,7 +258,7 @@ async function runOnboarding(payload, data, extra) {
   });
 
   const accessToken = signToken({ ...stripMeta(payload), onboarded: true, onboarding }, ONBOARDED_TTL);
-  const view = publicView({ ...payload, onboarded: true, onboarding });
+  const view = publicView({ ...payload, onboarded: true, onboarding, exp: Math.floor(Date.now() / 1000) + ONBOARDED_TTL });
   return {
     publicResult: { ...view, notes: result.notes || null },
     accessToken,

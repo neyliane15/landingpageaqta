@@ -14,9 +14,10 @@ const SUPPORT_WA = (document.body.dataset.supportWhatsapp || '').replace(/\D/g, 
 const params = new URLSearchParams(location.search);
 const paymentId = (params.get('payment_id') || params.get('collection_id') || '').trim();
 const validId = paymentId && paymentId !== 'null' && paymentId !== 'undefined';
-const extRef = (params.get('external_reference') || '').trim();
-const statusUrl = `/api/payment-status?payment_id=${encodeURIComponent(paymentId)}`
-  + (extRef && extRef !== 'null' ? `&external_reference=${encodeURIComponent(extRef)}` : '');
+const extRefRaw = (params.get('external_reference') || '').trim();
+const extRef = extRefRaw && extRefRaw !== 'null' && extRefRaw !== 'undefined' ? extRefRaw : '';
+// O servidor exige external_reference junto do payment_id (proteção contra enumeração de ids).
+const statusUrl = `/api/payment-status?payment_id=${encodeURIComponent(paymentId)}&external_reference=${encodeURIComponent(extRef)}`;
 
 let current = null;    // último payload de /api/payment-status
 let poll = null;       // estado do polling (pendente)
@@ -688,6 +689,12 @@ if (!validId) {
   renderError({
     title: 'Não encontramos o seu pagamento',
     message: 'Este link não traz o código do pagamento. Se você acabou de pagar, volte pelo botão “Voltar ao site” do Mercado Pago ou fale com a gente — liberamos seu acesso rapidamente.',
+    retry: false,
+  });
+} else if (!extRef) {
+  renderError({
+    title: 'Link de retorno incompleto',
+    message: 'Este link não traz todos os dados do pedido, então não conseguimos confirmar o pagamento por aqui. Fale com o suporte pelo WhatsApp — liberamos seu acesso rapidamente.',
     retry: false,
   });
 } else {
