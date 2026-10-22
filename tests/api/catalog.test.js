@@ -1,0 +1,49 @@
+import { test, before, after } from 'node:test';
+import assert from 'node:assert/strict';
+import { startServer, patchEnv } from '../helpers/server.js';
+
+let srv;
+before(async () => { srv = await startServer(); });
+after(() => srv.close());
+
+test('GET /api/catalog devolve Obtra R$ 200 e Emptra R$ 300 (centavos e texto) e demo=true', async () => {
+  const r = await srv.request('/api/catalog');
+  assert.equal(r.status, 200);
+  assert.match(r.headers.get('content-type'), /application\/json/);
+  assert.equal(r.headers.get('cache-control'), 'no-store');
+  assert.equal(r.body.demo, true);
+  const byId = Object.fromEntries(r.body.products.map((p) => [p.id, p]));
+  assert.deepEqual(Object.keys(byId).sort(), ['emptra', 'obtra']);
+  const ob = byId.obtra.plans.find((p) => p.id === 'basico');
+  const em = byId.emptra.plans.find((p) => p.id === 'basico');
+  assert.equal(ob.priceCents, 20000);
+  assert.equal(em.priceCents, 30000);
+  // toLocaleString usa NBSP entre "R$" e o número
+  assert.equal(ob.price.replace(/\s/g, ' '), 'R$ 200,00');
+  assert.equal(em.price.replace(/\s/g, ' '), 'R$ 300,00');
+  assert.equal(ob.interval, 'mês');
+  for (const p of r.body.products) {
+    assert.ok(p.name && p.tagline);
+    assert.equal(p.appUrl, undefined, 'não deve expor dados internos');
+  }
+});
+
+test('GET /api/catalog: demo=false quando MP_ACCESS_TOKEN existe', async () => {
+  const restore = patchEnv({ MP_ACCESS_TOKEN: 'TEST-123', AQTA_TOKEN_SECRET: 'x'.repeat(32) });
+  try {
+    const r = await srv.request('/api/catalog');
+    assert.equal(r.status, 200);
+    assert.equal(r.body.demo, false);
+  } finally { restore(); }
+});
+
+test('HEAD /api/catalog é aceito; POST/PUT/DELETE ⇒ 405 com Allow', async () => {
+  const h = await srv.request('/api/catalog', { method: 'HEAD' });
+  assert.equal(h.status, 200);
+  for (const method of ['POST', 'PUT', 'DELETE', 'PATCH']) {
+    const r = await srv.request('/api/catalog', { method, body: {} });
+    assert.equal(r.status, 405, method);
+    assert.equal(r.body.error, 'method_not_allowed');
+    assert.match(r.headers.get('allow'), /GET/);
+  }
+});

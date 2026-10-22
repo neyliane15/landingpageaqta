@@ -7,7 +7,7 @@
   "engines": { "node": ">=20" },
   "scripts": {
     "dev": "node server.js",
-    "test": "node --test tests/api/",
-    "test:e2e": "node --test tests/e2e/"
+    "test": "node --test 'tests/api/**/*.test.js'",
+    "test:e2e": "node --test --test-concurrency=1 'tests/e2e/**/*.test.js'"
   }
 }
