@@ -333,7 +333,7 @@ function renderRejected(d) {
     <div class="ob-center">
       <div class="page-shell__actions">
         <a class="btn btn--primary" href="/#planos">Tentar novamente</a>
-        <a class="btn btn--ghost" href="${esc(waLink(`Olá! Meu pagamento do ${d.productName || 'sistema Aqta'} não foi aprovado. Podem me ajudar?`))}" target="_blank" rel="noopener">Falar com o suporte no WhatsApp</a>
+        <a class="btn btn--ghost" href="${esc(waLink(`Olá! Meu pagamento do ${d.productName || 'sistema Aqta'} não foi aprovado. Podem me ajudar?`))}" target="_blank" rel="noopener">Suporte no WhatsApp</a>
       </div>
       <p class="ob-note">Dica: o PIX é aprovado na hora e não depende de limite do cartão.</p>
     </div>`, { announce: `${title}. ${reason}` });

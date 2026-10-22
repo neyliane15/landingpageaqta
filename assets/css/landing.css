@@ -708,7 +708,7 @@ html { scroll-behavior: smooth; scroll-padding-top: calc(var(--lp-header-h, 64px
 .lp-404 .lp-hero { flex: 1; display: flex; align-items: center; padding-bottom: 72px; }
 .lp-404__box { text-align: center; max-width: 560px; margin: 0 auto; padding: 48px 24px; }
 .lp-404__code {
-  margin: 0 0 8px; font-family: var(--lp-display); font-size: clamp(56px, 14vw, 112px); line-height: 1;
+  margin: 0 0 20px; font-family: var(--lp-display); font-size: clamp(56px, 14vw, 112px); line-height: 1;
   letter-spacing: .08em; color: transparent;
   -webkit-text-stroke: 1px rgba(1, 191, 253, .8);
   text-shadow: 0 0 40px rgba(1, 191, 253, .35);
@@ -716,6 +716,8 @@ html { scroll-behavior: smooth; scroll-padding-top: calc(var(--lp-header-h, 64px
 .lp-404__box .lp-lead { margin: 0 auto 28px; max-width: 42ch; }
 .lp-404__box .lp-hero__ctas { justify-content: center; }
 .lp-404 .lp-header { background: rgba(5, 7, 11, .82); }
+.lp-404 .lp-footer { padding-top: 0; }
+.lp-404 .lp-footer__base { margin-top: 0; }
 
 /* links de navegação não sublinham (aqta.css sublinha a:hover) */
 .lp-nav__link:hover, .lp-footer__nav a:hover, .lp-hero__custom:hover, .lp-header__logo:hover, .lp-skip:hover { text-decoration: none; }

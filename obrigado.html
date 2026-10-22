@@ -15,7 +15,8 @@
   <link rel="stylesheet" href="/assets/css/aqta.css">
   <style>
     /* Estilos exclusivos da página /obrigado (prefixo ob-). Componentes vêm de aqta.css. */
-    .ob-wrap { width: 100%; max-width: 760px; display: grid; gap: 20px; }
+    .ob-wrap { width: 100%; max-width: 760px; min-width: 0; display: grid; gap: 20px; }
+    .ob-wrap > * { min-width: 0; }
     .ob-card:focus, .ob-card .page-shell__title:focus { outline: none; }
     .ob-head { display: grid; justify-items: center; text-align: center; gap: 12px; }
     .ob-head .page-shell__lead { max-width: 54ch; margin: 0; }
@@ -74,6 +75,7 @@
     .ob-divider { display: flex; align-items: center; gap: 14px; margin-top: 10px; }
     .ob-divider::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, var(--line-strong, #2a3646), transparent); }
     .ob-form { display: grid; gap: 16px; }
+    .ob-form .field { align-content: start; }
     .ob-form-title { font-family: var(--font-display); font-size: 15px; font-weight: 400; margin: 0; }
     .ob-form > .ob-note { margin-top: -8px; }
     .ob-city { display: grid; grid-template-columns: minmax(0, 1fr) 104px; gap: 12px; }
