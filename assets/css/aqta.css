@@ -675,8 +675,7 @@ dialog.modal, .modal {
   z-index: 2;
   width: 34px;
   height: 34px;
-  display: grid;
-  place-items: center;
+  overflow: hidden;
   font-size: 0;
   color: var(--muted);
   border: 1px solid var(--line-strong);
@@ -686,7 +685,9 @@ dialog.modal, .modal {
 }
 .modal__close::before, .modal__close::after {
   content: "";
-  grid-area: 1 / 1;
+  position: absolute;
+  inset: 0;
+  margin: auto;
   width: 14px;
   height: 1.5px;
   background: currentColor;
