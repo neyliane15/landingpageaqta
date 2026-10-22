@@ -4,6 +4,8 @@ Contrato de arquitetura. **Todo agente lê este arquivo antes de começar e só 
 
 ## Visão geral
 
+- **Estáticos ficam em `public/`** (`outputDirectory` da Vercel): os caminhos de páginas/assets citados abaixo são relativos a `public/`. `api/`, `lib/`, `tests/`, `docs/` nunca são publicados como arquivos.
+
 - Site estático (HTML/CSS/JS puro, sem build) + funções serverless em `api/*.js` (formato Vercel Node:
   `export default async function handler(req, res)`). ESM (`"type": "module"`), Node ≥ 20, **zero dependências npm**
   (usar `fetch` e `node:crypto` nativos).

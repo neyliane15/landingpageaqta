@@ -95,13 +95,13 @@ describe('REV-2/REV-3 — reembolso e chargeback', () => {
 });
 
 describe('REV-4 — deploy na Vercel publica arquivos internos', () => {
-  test('existe .vercelignore excluindo lib/, tests/, docs/ e server.js', () => {
-    // A Vercel publica como estático tudo o que está na raiz (sem framework/outputDirectory). O bloqueio de
-    // `lib/`, `tests/`, `docs/` e `server.js` testado em static.test.js é do server.js LOCAL, não da Vercel.
-    const file = path.join(ROOT, '.vercelignore');
-    assert.ok(fs.existsSync(file), 'BUG: sem .vercelignore, /lib/token.js, /server.js, /docs/ARQUITETURA.md e /tests/RELATORIO-TESTES.md ficam públicos no deploy.');
-    const txt = fs.readFileSync(file, 'utf8');
-    for (const p of ['lib', 'tests', 'docs', 'server.js']) assert.match(txt, new RegExp(`^/?${p.replace('.', '\\.')}`, 'm'), `.vercelignore sem ${p}`);
+  test('só public/ é publicado como estático (outputDirectory) e nada interno mora lá', () => {
+    // A Vercel publica como estático o outputDirectory; funções em api/ continuam empacotando lib/ via import.
+    const cfg = JSON.parse(fs.readFileSync(path.join(ROOT, 'vercel.json'), 'utf8'));
+    assert.equal(cfg.outputDirectory, 'public');
+    for (const p of ['lib', 'tests', 'docs', 'api', 'server.js', 'package.json', '.env.example']) {
+      assert.ok(!fs.existsSync(path.join(ROOT, 'public', p)), `public/${p} não deveria existir`);
+    }
   });
 });
 

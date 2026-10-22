@@ -4,7 +4,7 @@
   "private": true,
   "description": "Landing page da Aqta — venda do Obtra e do Emptra com checkout Mercado Pago e onboarding pós-pagamento.",
   "type": "module",
-  "engines": { "node": ">=20" },
+  "engines": { "node": ">=22" },
   "scripts": {
     "dev": "node server.js",
     "test": "node --test 'tests/api/**/*.test.js'",

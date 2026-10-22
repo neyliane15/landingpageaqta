@@ -6,6 +6,7 @@ import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
+const publicDir = path.join(root, 'public'); // só esta pasta é servida (igual ao outputDirectory da Vercel)
 
 if (fs.existsSync(path.join(root, '.env'))) {
   for (const line of fs.readFileSync(path.join(root, '.env'), 'utf8').split('\n')) {
@@ -20,7 +21,6 @@ const TYPES = {
   '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg',
   '.webp': 'image/webp', '.ico': 'image/x-icon', '.woff2': 'font/woff2',
 };
-const PRIVATE = /^\/(lib|tests|docs|node_modules|\.git|\.env|server\.js|package)/;
 
 async function readBody(req) {
   const chunks = [];
@@ -52,14 +52,13 @@ export function createServer() {
         const mod = await import(pathToFileURL(file).href);
         return await mod.default(req, res);
       }
-      if (PRIVATE.test(pathname)) { res.statusCode = 404; return res.end('Not found'); }
       if (pathname.endsWith('/')) pathname += 'index.html';
-      let file = path.join(root, pathname);
-      if (!file.startsWith(root)) { res.statusCode = 403; return res.end(); }
+      let file = path.join(publicDir, pathname);
+      if (!file.startsWith(publicDir + path.sep)) { res.statusCode = 403; return res.end(); }
       if (!path.extname(file) && fs.existsSync(file + '.html')) file += '.html'; // cleanUrls
       if (!fs.existsSync(file) || fs.statSync(file).isDirectory()) {
         res.statusCode = 404; res.setHeader('Content-Type', TYPES['.html']);
-        const nf = path.join(root, '404.html');
+        const nf = path.join(publicDir, '404.html');
         return res.end(fs.existsSync(nf) ? fs.readFileSync(nf) : 'Not found');
       }
       res.setHeader('Content-Type', TYPES[path.extname(file)] || 'application/octet-stream');

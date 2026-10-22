@@ -50,7 +50,7 @@ test('path traversal não escapa da raiz', async () => {
 
 test('assets referenciados nas páginas existem e têm Content-Type correto', async () => {
   const html = ['index.html', 'obrigado.html', 'acesso.html', 'checkout-demo.html', '404.html']
-    .map((f) => fs.readFileSync(path.join(ROOT, f), 'utf8')).join('\n');
+    .map((f) => fs.readFileSync(path.join(ROOT, 'public', f), 'utf8')).join('\n');
   const refs = new Set([...html.matchAll(/(?:src|href)="(\/assets\/[^"#?]+)"/g)].map((m) => m[1]));
   assert.ok(refs.size > 5);
   for (const ref of refs) {
