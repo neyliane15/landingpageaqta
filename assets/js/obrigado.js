@@ -80,7 +80,7 @@ function render(html, { announce, focus = true, busy = false } = {}) {
     setTimeout(() => { $announce.textContent = announce; }, 60);
   }
   if (focus) {
-    const title = $state.querySelector('.ob-title');
+    const title = $state.querySelector('.page-shell__title');
     if (title) title.focus({ preventScroll: false });
   }
 }
@@ -90,11 +90,11 @@ function render(html, { announce, focus = true, busy = false } = {}) {
 function renderLoading(text = 'Confirmando seu pagamento…') {
   setSteps('current');
   render(`
-    <div class="ob-loading ob-center">
-      <span class="spinner" aria-hidden="true"></span>
+    <div class="ob-head ob-loading">
+      <span class="spinner spinner--lg" aria-hidden="true"></span>
       <p class="eyebrow">Pagamento</p>
-      <h1 class="ob-title" id="ob-title" tabindex="-1">${esc(text)}</h1>
-      <p class="ob-lead">Estamos consultando o Mercado Pago. Isso leva só alguns segundos.</p>
+      <h1 class="page-shell__title" id="ob-title" tabindex="-1">${esc(text)}</h1>
+      <p class="page-shell__lead">Estamos consultando o Mercado Pago. Isso leva só alguns segundos.</p>
     </div>`, { busy: true, focus: false });
 }
 
@@ -102,12 +102,12 @@ function renderError({ title, message, retry = true }) {
   stopPolling();
   setSteps('err');
   render(`
-    <div class="ob-center">
-      <div class="ob-icon ob-icon--err" aria-hidden="true">!</div>
+    <div class="ob-head">
+      <div class="page-shell__icon page-shell__icon--err" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 7v6M12 17h.01"/></svg></div>
       <p class="eyebrow">Algo não saiu como esperado</p>
-      <h1 class="ob-title" id="ob-title" tabindex="-1">${esc(title)}</h1>
-      <p class="ob-lead">${message}</p>
-      <div class="ob-actions">
+      <h1 class="page-shell__title" id="ob-title" tabindex="-1">${esc(title)}</h1>
+      <p class="page-shell__lead">${message}</p>
+      <div class="page-shell__actions">
         ${retry ? '<button type="button" class="btn btn--primary" data-action="retry">Tentar novamente</button>' : ''}
         <a class="btn btn--ghost" href="${esc(waLink(`Olá! Preciso de ajuda com meu pagamento na Aqta.${validId ? ` Código: ${paymentId.slice(0, 40)}` : ''}`))}" target="_blank" rel="noopener">Falar com o suporte</a>
         ${retry ? '' : '<a class="btn btn--ghost" href="/#planos">Ver planos</a>'}
@@ -142,7 +142,7 @@ function renderApproved(d) {
   const name = d.productName || (product === 'emptra' ? 'Emptra' : 'Obtra');
   const first = (d.customer?.name || '').trim().split(/\s+/)[0];
   render(`
-    <div class="ob-center">
+    <div class="ob-head">
       <div class="ob-seal" aria-hidden="true">
         <svg viewBox="0 0 80 80">
           <circle class="ob-seal__ring2" cx="40" cy="40" r="39"/>
@@ -156,9 +156,9 @@ function renderApproved(d) {
           </g>
         </svg>
       </div>
-      <p class="eyebrow"><span class="badge badge--ok">Pagamento aprovado</span></p>
-      <h1 class="ob-title" id="ob-title" tabindex="-1">Pagamento confirmado</h1>
-      <p class="ob-lead">${first ? `${esc(first)}, falta` : 'Falta'} só um passo para começar a usar o <strong>${esc(name)}</strong>: confirme os dados abaixo e ativamos o seu acesso.</p>
+      <span class="badge badge--ok">Pagamento aprovado</span>
+      <h1 class="page-shell__title" id="ob-title" tabindex="-1">Pagamento confirmado</h1>
+      <p class="page-shell__lead">${first ? `${esc(first)}, falta` : 'Falta'} só um passo para começar a usar o <strong>${esc(name)}</strong>: confirme os dados abaixo e ativamos o seu acesso.</p>
     </div>
     ${summaryHTML(d)}
     ${activationFormHTML(d, product)}`, { announce: `Pagamento aprovado. Preencha os dados para ativar o ${name}.` });
@@ -171,26 +171,26 @@ function activationFormHTML(d, product) {
   const c = d.customer || {};
   const ufOptions = ['<option value="">UF</option>', ...UFS.map((u) => `<option>${u}</option>`)].join('');
   const extra = product === 'emptra' ? `
-      <fieldset class="ob-fieldset ob-span" id="f-perfil" aria-describedby="err-perfil">
-        <legend class="ob-legend">Como você vai usar o Emptra?</legend>
+      <fieldset class="ob-fieldset form-grid__full" id="f-perfil" aria-describedby="err-perfil">
+        <legend>Como você vai usar o Emptra?</legend>
         <div class="ob-radios">
           <label class="ob-radio"><input type="radio" name="perfil" value="comprador" required>
             <span><strong>Comprador</strong><small>Arquiteto, engenheiro ou construtora que cota materiais.</small></span></label>
           <label class="ob-radio"><input type="radio" name="perfil" value="fornecedor">
             <span><strong>Fornecedor</strong><small>Loja ou distribuidor que recebe e responde cotações.</small></span></label>
         </div>
-        <p class="field-error" id="err-perfil" data-error-for="perfil" hidden></p>
+        <p class="field-error" id="err-perfil" data-error-for="perfil"></p>
       </fieldset>
-      <div class="ob-span ob-grid--city">
+      <div class="ob-city form-grid__full">
         <div class="field">
           <label for="f-cidade">Cidade de atuação</label>
           <input id="f-cidade" name="cidade" autocomplete="address-level2" required maxlength="80" aria-describedby="err-cidade">
-          <p class="field-error" id="err-cidade" data-error-for="cidade" hidden></p>
+          <p class="field-error" id="err-cidade" data-error-for="cidade"></p>
         </div>
         <div class="field">
           <label for="f-uf">UF</label>
           <select id="f-uf" name="uf" autocomplete="address-level1" required aria-describedby="err-uf">${ufOptions}</select>
-          <p class="field-error" id="err-uf" data-error-for="uf" hidden></p>
+          <p class="field-error" id="err-uf" data-error-for="uf"></p>
         </div>
       </div>` : `
       <div class="field">
@@ -202,18 +202,18 @@ function activationFormHTML(d, product) {
           <option value="11-30">11 a 30 obras</option>
           <option value="30+">Mais de 30 obras</option>
         </select>
-        <p class="field-error" id="err-obrasAtivas" data-error-for="obrasAtivas" hidden></p>
+        <p class="field-error" id="err-obrasAtivas" data-error-for="obrasAtivas"></p>
       </div>
-      <div class="ob-grid--city">
+      <div class="ob-city">
         <div class="field">
           <label for="f-cidade">Cidade</label>
           <input id="f-cidade" name="cidade" autocomplete="address-level2" required maxlength="80" aria-describedby="err-cidade">
-          <p class="field-error" id="err-cidade" data-error-for="cidade" hidden></p>
+          <p class="field-error" id="err-cidade" data-error-for="cidade"></p>
         </div>
         <div class="field">
           <label for="f-uf">UF</label>
           <select id="f-uf" name="uf" autocomplete="address-level1" required aria-describedby="err-uf">${ufOptions}</select>
-          <p class="field-error" id="err-uf" data-error-for="uf" hidden></p>
+          <p class="field-error" id="err-uf" data-error-for="uf"></p>
         </div>
       </div>`;
 
@@ -221,47 +221,47 @@ function activationFormHTML(d, product) {
   const wa = waDisplayDigits(c.whatsapp);
   return `
     <div class="ob-divider" aria-hidden="true"><span class="eyebrow">Ativação</span></div>
-    <form id="ob-form" novalidate aria-describedby="ob-form-desc">
+    <form id="ob-form" class="ob-form" novalidate aria-describedby="ob-form-desc">
       <h2 class="ob-form-title">Dados da conta</h2>
-      <p class="ob-note" id="ob-form-desc" style="margin-top:0">Usaremos estes dados para criar o acesso da sua empresa. Todos os campos são obrigatórios.</p>
-      <div class="ob-grid">
-        <div class="field ob-span">
+      <p class="ob-note" id="ob-form-desc">Usaremos estes dados para criar o acesso da sua empresa. Todos os campos são obrigatórios.</p>
+      <div class="form-grid">
+        <div class="field form-grid__full">
           <label for="f-company">Nome da empresa</label>
           <input id="f-company" name="company" autocomplete="organization" required minlength="2" maxlength="120"
             value="${esc(c.company || '')}" aria-describedby="err-company">
-          <p class="field-error" id="err-company" data-error-for="company" hidden></p>
+          <p class="field-error" id="err-company" data-error-for="company"></p>
         </div>
         <div class="field">
           <label for="f-document">CNPJ ou CPF</label>
           <input id="f-document" name="document" inputmode="numeric" autocomplete="off" required maxlength="18"
             placeholder="00.000.000/0000-00" value="${esc(maskDocument(doc))}" aria-describedby="${!doc && c.documentMasked ? 'hint-document ' : ''}err-document">
-          ${!doc && c.documentMasked ? `<small class="ob-hint" id="hint-document">Informado no pagamento: ${esc(c.documentMasked)}</small>` : ''}
-          <p class="field-error" id="err-document" data-error-for="document" hidden></p>
+          ${!doc && c.documentMasked ? `<small class="field-hint" id="hint-document">Informado no pagamento: ${esc(c.documentMasked)}</small>` : ''}
+          <p class="field-error" id="err-document" data-error-for="document"></p>
         </div>
         <div class="field">
           <label for="f-responsible">Responsável</label>
           <input id="f-responsible" name="responsible" autocomplete="name" required minlength="3" maxlength="120"
             value="${esc(c.name || '')}" aria-describedby="err-responsible">
-          <p class="field-error" id="err-responsible" data-error-for="responsible" hidden></p>
+          <p class="field-error" id="err-responsible" data-error-for="responsible"></p>
         </div>
         <div class="field">
           <label for="f-loginEmail">E-mail de login</label>
           <input id="f-loginEmail" name="loginEmail" type="email" autocomplete="email" required maxlength="160"
             value="${esc(c.email || '')}" aria-describedby="hint-loginEmail err-loginEmail">
-          <small class="ob-hint" id="hint-loginEmail">Será o seu usuário no ${esc(d.productName || product)}.</small>
-          <p class="field-error" id="err-loginEmail" data-error-for="loginEmail" hidden></p>
+          <small class="field-hint" id="hint-loginEmail">Será o seu usuário no ${esc(d.productName || product)}.</small>
+          <p class="field-error" id="err-loginEmail" data-error-for="loginEmail"></p>
         </div>
         <div class="field">
           <label for="f-whatsapp">WhatsApp</label>
           <input id="f-whatsapp" name="whatsapp" type="tel" inputmode="tel" autocomplete="tel-national" required maxlength="16"
             placeholder="(00) 00000-0000" value="${esc(maskPhone(wa))}" aria-describedby="err-whatsapp">
-          <p class="field-error" id="err-whatsapp" data-error-for="whatsapp" hidden></p>
+          <p class="field-error" id="err-whatsapp" data-error-for="whatsapp"></p>
         </div>
         ${extra}
       </div>
-      <div class="ob-form-alert" id="ob-form-alert" role="alert" aria-live="assertive"></div>
-      <button type="submit" class="btn btn--primary btn--block ob-submit">Ativar meu acesso</button>
-      <p class="ob-note ob-center">Ao ativar, você concorda com os termos de uso do ${esc(d.productName || product)}.</p>
+      <div id="ob-form-alert" role="alert" aria-live="assertive"></div>
+      <button type="submit" class="btn btn--primary btn--block">Ativar meu acesso</button>
+      <p class="ob-note" style="text-align:center">Ao ativar, você concorda com os termos de uso do ${esc(d.productName || product)}.</p>
     </form>`;
 }
 
@@ -270,23 +270,23 @@ function renderPending(d) {
   const isPix = /pix|bank_transfer/i.test(d.paymentMethod || d.payment_type || '');
   const isBoleto = /boleto|ticket/i.test(d.paymentMethod || d.payment_type || '');
   render(`
-    <div class="ob-center">
-      <div class="ob-icon ob-icon--warn" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9.5 2.5h5"/></svg></div>
-      <p class="eyebrow"><span class="badge badge--warn">${d.status === 'in_process' ? 'Em análise' : 'Aguardando pagamento'}</span></p>
-      <h1 class="ob-title" id="ob-title" tabindex="-1">${d.status === 'in_process' ? 'Seu pagamento está em análise' : 'Estamos aguardando a confirmação'}</h1>
-      <p class="ob-lead">${d.status === 'in_process'
+    <div class="ob-head">
+      <div class="page-shell__icon page-shell__icon--warn" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9.5 2.5h5"/></svg></div>
+      <span class="badge badge--warn">${d.status === 'in_process' ? 'Em análise' : 'Aguardando pagamento'}</span>
+      <h1 class="page-shell__title" id="ob-title" tabindex="-1">${d.status === 'in_process' ? 'Seu pagamento está em análise' : 'Estamos aguardando a confirmação'}</h1>
+      <p class="page-shell__lead">${d.status === 'in_process'
         ? 'O Mercado Pago está revisando o pagamento — normalmente leva poucos minutos. Assim que for aprovado, esta página avança sozinha.'
         : `Seu pedido do <strong>${esc(d.productName || 'sistema Aqta')}</strong> foi criado. Assim que o pagamento cair, esta página avança sozinha para a ativação.`}</p>
     </div>
     ${summaryHTML(d)}
-    <div class="ob-pix">
+    <div class="ob-methods">
       ${isBoleto ? '' : '<div><h3>PIX</h3><p>Confirmado em segundos após o pagamento. Se ainda não pagou, use o QR Code ou o código copia-e-cola do Mercado Pago.</p></div>'}
       ${isPix ? '' : '<div><h3>Boleto</h3><p>A compensação leva até 3 dias úteis. Você receberá um e-mail quando for confirmado — pode fechar esta página.</p></div>'}
     </div>
     <div class="ob-center">
-      <div class="ob-poll" id="ob-poll"><span class="ob-dot" aria-hidden="true"></span><span id="ob-poll-text">Verificando automaticamente…</span></div>
+      <p class="ob-poll" id="ob-poll"><span class="ob-dot" aria-hidden="true"></span><span id="ob-poll-text">Verificando automaticamente…</span></p>
       <div class="ob-meter" aria-hidden="true"><i id="ob-meter"></i></div>
-      <div class="ob-actions">
+      <div class="page-shell__actions">
         <button type="button" class="btn btn--primary" data-action="check">Já paguei — verificar agora</button>
         <a class="btn btn--ghost" href="${esc(waLink(`Olá! Fiz o pagamento do ${d.productName || 'sistema Aqta'} e ele ainda aparece como pendente.`))}" target="_blank" rel="noopener">Falar com o suporte</a>
       </div>
@@ -323,15 +323,15 @@ function renderRejected(d) {
       : 'O meio de pagamento não foi autorizado. Nenhum valor foi cobrado.');
   const title = cancelled ? 'Pagamento cancelado' : 'Pagamento não aprovado';
   render(`
-    <div class="ob-center">
-      <div class="ob-icon ob-icon--err" aria-hidden="true">✕</div>
-      <p class="eyebrow"><span class="badge badge--err">${cancelled ? 'Cancelado' : 'Recusado'}</span></p>
-      <h1 class="ob-title" id="ob-title" tabindex="-1">${title}</h1>
-      <p class="ob-lead">${esc(reason)}</p>
+    <div class="ob-head">
+      <div class="page-shell__icon page-shell__icon--err" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M7 7l10 10M17 7L7 17"/></svg></div>
+      <span class="badge badge--err">${cancelled ? 'Cancelado' : 'Recusado'}</span>
+      <h1 class="page-shell__title" id="ob-title" tabindex="-1">${title}</h1>
+      <p class="page-shell__lead">${esc(reason)}</p>
     </div>
     ${d.product ? summaryHTML(d) : ''}
     <div class="ob-center">
-      <div class="ob-actions">
+      <div class="page-shell__actions">
         <a class="btn btn--primary" href="/#planos">Tentar novamente</a>
         <a class="btn btn--ghost" href="${esc(waLink(`Olá! Meu pagamento do ${d.productName || 'sistema Aqta'} não foi aprovado. Podem me ajudar?`))}" target="_blank" rel="noopener">Falar com o suporte no WhatsApp</a>
       </div>
@@ -569,7 +569,8 @@ function validateForm(form, product) {
 }
 
 function clearErrors(form) {
-  for (const p of form.querySelectorAll('[data-error-for]')) { p.hidden = true; p.textContent = ''; }
+  for (const p of form.querySelectorAll('[data-error-for]')) p.textContent = '';
+  for (const f of form.querySelectorAll('.has-error')) f.classList.remove('has-error');
   for (const el of form.querySelectorAll('[aria-invalid]')) el.removeAttribute('aria-invalid');
   form.querySelector('#ob-form-alert').innerHTML = '';
 }
@@ -581,7 +582,7 @@ function showErrors(form, errors) {
     const p = form.querySelector(`[data-error-for="${CSS.escape(key)}"]`);
     if (!p) continue;
     p.textContent = String(msg);
-    p.hidden = false;
+    p.closest('.field')?.classList.add('has-error');
     const input = form.elements[key];
     const target = input instanceof RadioNodeList ? input[0] : input;
     if (input instanceof RadioNodeList) form.querySelector('#f-perfil')?.setAttribute('aria-invalid', 'true');
@@ -603,7 +604,7 @@ function wireForm(d, product) {
     const name = e.target.name;
     if (!name) return;
     const p = form.querySelector(`[data-error-for="${CSS.escape(name)}"]`);
-    if (p && !p.hidden) { p.hidden = true; e.target.removeAttribute('aria-invalid'); form.querySelector('#f-perfil')?.removeAttribute('aria-invalid'); }
+    if (p && p.textContent) { p.textContent = ''; p.closest('.field')?.classList.remove('has-error'); e.target.removeAttribute('aria-invalid'); form.querySelector('#f-perfil')?.removeAttribute('aria-invalid'); }
   });
 
   form.addEventListener('submit', async (e) => {
@@ -684,6 +685,8 @@ function wireForm(d, product) {
 
 const supportLink = document.getElementById('ob-support-link');
 if (supportLink) supportLink.href = waLink('Olá! Tenho uma dúvida sobre minha contratação na Aqta.');
+const supportNav = document.getElementById('ob-support-nav');
+if (supportNav) supportNav.href = waLink('Olá! Tenho uma dúvida sobre minha contratação na Aqta.');
 
 if (!validId) {
   renderError({

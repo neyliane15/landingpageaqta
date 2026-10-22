@@ -87,32 +87,48 @@ const STEPS = {
   ],
 };
 
+const ICONS = {
+  ok: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  warn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>',
+  err: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 7v6M12 16.5v.5"/><circle cx="12" cy="12" r="8.5"/></svg>',
+};
+
+function head(kind, badge, title) {
+  return `
+    <div class="ac-head">
+      <span class="page-shell__icon page-shell__icon--${kind}">${ICONS[kind]}</span>
+      <span class="badge badge--${kind}">${esc(badge)}</span>
+    </div>
+    <h1 class="page-shell__title ac-title">${title}</h1>`;
+}
+
 function stepsHTML(d) {
   const list = d.product === 'obtra' ? STEPS.obtra() : STEPS[d.profile === 'fornecedor' ? 'fornecedor' : 'comprador']();
-  const who = d.product === 'emptra' ? ` <span class="badge">${d.profile === 'fornecedor' ? 'Fornecedor' : 'Comprador'}</span>` : '';
+  const who = d.product === 'emptra' ? ` · ${d.profile === 'fornecedor' ? 'Fornecedor' : 'Comprador'}` : '';
   return `
-    <section class="frame ac-card" aria-labelledby="ac-steps-title">
-      <p class="eyebrow">Primeiros passos</p>
-      <h2 class="ac-h2" id="ac-steps-title">Comece a usar o ${esc(d.productName)}${who}</h2>
-      <ol class="ac-steps-list">
+    <section class="frame page-shell__card" aria-labelledby="ac-steps-title">
+      <p class="eyebrow">Primeiros passos${esc(who)}</p>
+      <h2 class="ac-h2" id="ac-steps-title">Comece a usar o ${esc(d.productName)}</h2>
+      <ol class="steps">
         ${list.map(([t, txt]) => `<li><strong>${esc(t)}</strong>${txt}</li>`).join('')}
       </ol>
     </section>`;
 }
 
+const setProgressWait = () => document.getElementById('ac-step-3')?.setAttribute('data-s', 'wait');
+
 // ---------------------------------------------------------------- estados
 
 function viewInvalid(kind) {
   const expired = kind === 'expired';
-  document.getElementById('ac-step-3')?.setAttribute('data-s', 'wait');
+  setProgressWait();
   render(`
-    <section class="frame ac-card">
-      <span class="badge badge--err">${expired ? 'Link expirado' : 'Link inválido'}</span>
-      <h1 class="ac-title">${expired ? 'Este link de acesso expirou' : 'Não encontramos o seu acesso'}</h1>
-      <p class="ac-lead">${expired
+    <section class="frame page-shell__card">
+      ${head('err', expired ? 'Link expirado' : 'Link inválido', expired ? 'Este link de acesso expirou' : 'Não encontramos o seu acesso')}
+      <p class="page-shell__lead">${expired
         ? 'Por segurança, o link de acesso tem validade. Seu pagamento e seu acesso continuam garantidos — fale com a gente que reenviamos os dados.'
         : 'O link pode estar incompleto. Abra o link exatamente como recebeu ou fale com o suporte — seu pagamento está garantido.'}</p>
-      <div class="ac-actions">
+      <div class="page-shell__actions">
         <a class="btn btn--primary" href="${esc(waLink('Olá! Preciso de ajuda com o link de acesso ao meu sistema Aqta.'))}" target="_blank" rel="noopener">Falar com o suporte no WhatsApp</a>
         <a class="btn btn--ghost" href="/">Voltar ao site</a>
       </div>
@@ -121,11 +137,10 @@ function viewInvalid(kind) {
 
 function viewNetworkError(token) {
   render(`
-    <section class="frame ac-card">
-      <span class="badge badge--warn">Sem conexão</span>
-      <h1 class="ac-title">Não conseguimos carregar seus dados</h1>
-      <p class="ac-lead">Verifique sua internet e tente novamente.</p>
-      <div class="ac-actions">
+    <section class="frame page-shell__card">
+      ${head('warn', 'Sem conexão', 'Não conseguimos carregar seus dados')}
+      <p class="page-shell__lead">Verifique sua internet e tente novamente.</p>
+      <div class="page-shell__actions">
         <button class="btn btn--primary" type="button" id="ac-retry">Tentar novamente</button>
         <a class="btn btn--ghost" href="${esc(waLink('Olá! Não consigo abrir a página de acesso do meu sistema Aqta.'))}" target="_blank" rel="noopener">Falar com o suporte</a>
       </div>
@@ -134,18 +149,20 @@ function viewNetworkError(token) {
 }
 
 function viewPending(d) {
-  document.getElementById('ac-step-3')?.setAttribute('data-s', 'wait');
+  setProgressWait();
+  const support = safeUrl(d.supportWhatsappUrl) !== '#' ? d.supportWhatsappUrl : waLink(`Olá! Paguei o ${d.productName} e preciso concluir a ativação.`);
   render(`
-    <section class="frame ac-card">
-      <span class="badge badge--warn">Ativação pendente</span>
-      <h1 class="ac-title">Falta concluir a ativação do ${esc(d.productName)}</h1>
-      <p class="ac-lead">Seu pagamento foi aprovado, mas ainda precisamos dos dados da empresa para criar o acesso. Volte à página do pagamento para concluir, ou fale com a gente.</p>
-      <div class="ac-actions">
-        <a class="btn btn--primary" href="${esc(safeUrl(d.supportWhatsappUrl) !== '#' ? d.supportWhatsappUrl : waLink(`Olá! Paguei o ${d.productName} e preciso concluir a ativação.`))}" target="_blank" rel="noopener">Falar com o suporte no WhatsApp</a>
+    <section class="frame page-shell__card">
+      ${head('warn', 'Ativação pendente', `Falta concluir a ativação do ${esc(d.productName)}`)}
+      <p class="page-shell__lead">Seu pagamento foi aprovado, mas ainda precisamos dos dados da empresa para criar o acesso. Volte à página do pagamento para concluir, ou fale com a gente.</p>
+      <div class="page-shell__actions">
+        <a class="btn btn--primary" href="${esc(support)}" target="_blank" rel="noopener">Falar com o suporte no WhatsApp</a>
         <a class="btn btn--ghost" href="/">Voltar ao site</a>
       </div>
     </section>`);
 }
+
+const row = (dt, dd) => `<div><dt>${dt}</dt><dd>${dd}</dd></div>`;
 
 function viewReady(d) {
   const manual = d.mode === 'manual';
@@ -157,53 +174,43 @@ function viewReady(d) {
       : `Olá! Preciso de ajuda com o meu acesso ao ${d.productName}.`);
   const enter = `Entrar no ${esc(d.productName)}`;
   const forgot = d.product === 'obtra'
-    ? `Se não anotou a senha, use <em>Esqueci minha senha</em> na tela de login do Obtra com o e-mail acima.`
+    ? 'Se não anotou a senha, use <em>Esqueci minha senha</em> na tela de login do Obtra com o e-mail acima.'
     : `Se não anotou a senha, <a href="${esc(support)}" target="_blank" rel="noopener">fale com o suporte</a> que geramos uma nova.`;
-  const changeWhere = d.product === 'obtra' ? 'no menu do seu usuário, em <em>Trocar senha</em>' : 'em <em>Perfil</em>';
-
-  if (manual) document.getElementById('ac-step-3')?.setAttribute('data-s', 'wait');
+  const changeWhere = d.product === 'obtra' ? 'no menu do seu usuário, em <em>Trocar senha</em>' : 'em <em>Perfil</em>, no Emptra';
+  const help = document.getElementById('ac-help');
+  if (help) help.href = support;
+  if (manual) setProgressWait();
 
   const passwordRow = manual ? '' : pwd
-    ? `<dt>Senha temporária</dt>
-       <dd>
-         <div class="ac-secret">
-           <output class="ac-mono" id="ac-pwd" aria-label="Senha temporária (oculta)">••••••••••••</output>
-           <span class="ac-inline">
-             <button class="btn btn--ghost btn--sm" type="button" id="ac-show" aria-pressed="false" aria-controls="ac-pwd">Mostrar</button>
-             <button class="btn btn--ghost btn--sm" type="button" data-copy="pwd">Copiar</button>
-           </span>
-         </div>
-       </dd>`
-    : `<dt>Senha temporária</dt><dd><span class="ac-note" style="margin:0">Exibida apenas no momento da ativação, neste navegador. ${forgot}</span></dd>`;
+    ? row('<label for="ac-pwd">Senha temporária</label>', `
+        <div class="input-group">
+          <input id="ac-pwd" type="password" readonly value="${esc(pwd)}" autocomplete="off" spellcheck="false">
+          <button class="btn btn--ghost btn--sm" type="button" id="ac-show" aria-pressed="false" aria-controls="ac-pwd">Mostrar</button>
+          <button class="btn btn--ghost btn--sm" type="button" data-copy="pwd">Copiar</button>
+        </div>`)
+    : row('Senha temporária', `<span class="ac-note">Exibida só no momento da ativação, neste navegador. ${forgot}</span>`);
 
   render(`
-    <section class="frame frame--glow ac-card">
-      <span class="badge ${manual ? 'badge--warn' : 'badge--ok'}">${manual ? 'Liberação em andamento' : 'Acesso liberado'}</span>
-      <h1 class="ac-title">${manual
+    <section class="frame frame--glow page-shell__card">
+      ${head(manual ? 'warn' : 'ok', manual ? 'Liberação em andamento' : 'Acesso liberado', manual
         ? `Recebemos tudo. Seu ${esc(d.productName)} será liberado ${esc(d.manualDeadline || 'em até 1 dia útil')}`
-        : `Seu acesso ao ${esc(d.productName)} está pronto`}</h1>
-      <p class="ac-lead">${manual
+        : `Seu acesso ao ${esc(d.productName)} está pronto`)}
+      <p class="page-shell__lead">${manual
         ? `A equipe Aqta está criando o ambiente da <strong>${esc(d.company)}</strong> e avisa você no WhatsApp e no e-mail <strong>${esc(d.loginEmail)}</strong> assim que estiver tudo pronto. Se preferir, chame a gente agora.`
-        : `Use os dados abaixo para entrar. Guarde a senha temporária em local seguro — ela aparece só nesta sessão.`}</p>
+        : 'Use os dados abaixo para entrar. Guarde a senha temporária em local seguro — ela aparece só nesta sessão do navegador.'}</p>
 
-      <dl class="ac-data">
-        <dt>Produto</dt><dd>${esc(d.productName)} · Plano Básico</dd>
-        <dt>Empresa</dt><dd>${esc(d.company || '—')}</dd>
-        ${d.product === 'emptra' && d.profile ? `<dt>Perfil</dt><dd>${d.profile === 'fornecedor' ? 'Fornecedor' : 'Comprador'}</dd>` : ''}
-        <dt>E-mail de login</dt>
-        <dd>
-          <div class="ac-secret">
-            <span class="ac-mono" id="ac-email">${esc(d.loginEmail)}</span>
-            <button class="btn btn--ghost btn--sm" type="button" data-copy="email">Copiar</button>
-          </div>
-        </dd>
+      <dl class="summary ac-summary">
+        ${row('Produto', `${esc(d.productName)} · Plano Básico`)}
+        ${row('Empresa', esc(d.company || '—'))}
+        ${d.product === 'emptra' && d.profile ? row('Perfil', d.profile === 'fornecedor' ? 'Fornecedor' : 'Comprador') : ''}
+        ${row('E-mail de login', `<span class="mono">${esc(d.loginEmail)}</span> <button class="btn btn--ghost btn--sm" type="button" data-copy="email">Copiar</button>`)}
         ${passwordRow}
-        ${manual ? `<dt>Prazo</dt><dd>${esc(d.manualDeadline || 'até 1 dia útil')}</dd>` : ''}
+        ${manual ? row('Prazo de liberação', esc(d.manualDeadline || 'até 1 dia útil')) : ''}
       </dl>
 
-      ${!manual && pwd ? `<p class="alert alert--warn" style="margin-top:16px">Por segurança, troque a senha no primeiro acesso: ${changeWhere}.</p>` : ''}
+      ${!manual && pwd ? `<div class="alert alert--warn" role="note"><div><strong>Troque a senha no primeiro acesso.</strong> Por segurança, defina uma senha só sua ${changeWhere}.</div></div>` : ''}
 
-      <div class="ac-actions">
+      <div class="page-shell__actions">
         ${manual
           ? `<a class="btn btn--primary" href="${esc(support)}" target="_blank" rel="noopener">Falar com a Aqta no WhatsApp</a>
              <a class="btn btn--ghost" href="${esc(safeUrl(d.loginUrl))}">${enter}</a>`
@@ -211,7 +218,6 @@ function viewReady(d) {
              <a class="btn btn--ghost" href="${esc(support)}" target="_blank" rel="noopener">Precisa de ajuda?</a>`}
       </div>
       ${manual ? `<p class="ac-note">O botão “${enter}” funciona assim que o acesso for liberado.</p>` : ''}
-      <p class="ac-sr" id="ac-live" aria-live="polite"></p>
     </section>
     ${stepsHTML(d)}`);
 
@@ -252,14 +258,13 @@ function wireCopy(d, pwd) {
     });
   }
   const show = document.getElementById('ac-show');
-  const out = document.getElementById('ac-pwd');
-  if (show && out) {
+  const input = document.getElementById('ac-pwd');
+  if (show && input) {
     show.addEventListener('click', () => {
       const visible = show.getAttribute('aria-pressed') === 'true';
       show.setAttribute('aria-pressed', String(!visible));
       show.textContent = visible ? 'Mostrar' : 'Ocultar';
-      out.textContent = visible ? '••••••••••••' : pwd;
-      out.setAttribute('aria-label', visible ? 'Senha temporária (oculta)' : 'Senha temporária');
+      input.type = visible ? 'password' : 'text';
     });
   }
 }
@@ -268,10 +273,10 @@ function wireCopy(d, pwd) {
 
 async function load(token) {
   render(`
-    <section class="frame ac-card">
-      <div class="ac-center" role="status">
-        <span class="spinner" aria-hidden="true"></span>
-        <p class="ac-lead">Carregando seus dados de acesso…</p>
+    <section class="frame page-shell__card">
+      <div class="ac-center">
+        <span class="spinner spinner--lg" role="status"><span class="sr-only">Carregando</span></span>
+        <p class="page-shell__lead">Carregando seus dados de acesso…</p>
       </div>
     </section>`, { focus: false });
 

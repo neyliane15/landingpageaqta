@@ -26,6 +26,7 @@ html { scroll-behavior: smooth; scroll-padding-top: calc(var(--lp-header-h, 64px
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 
 .lp main { display: block; }
+.lp h3, .lp .lp-title { font-family: var(--lp-body); }
 .lp img { max-width: 100%; height: auto; }
 
 /* acessibilidade: pular para o conteúdo */
@@ -114,7 +115,7 @@ html { scroll-behavior: smooth; scroll-padding-top: calc(var(--lp-header-h, 64px
     max-height: calc(100dvh - var(--lp-header-h)); overflow-y: auto;
     flex-direction: column; align-items: stretch; gap: 16px;
     padding: 16px 16px 24px;
-    background: rgba(5, 7, 11, .97);
+    background: #05070b;
     border-bottom: 1px solid rgba(1, 191, 253, .3);
     box-shadow: 0 24px 48px rgba(0, 0, 0, .5);
     opacity: 0; visibility: hidden; transform: translateY(-8px);
@@ -248,7 +249,7 @@ html { scroll-behavior: smooth; scroll-padding-top: calc(var(--lp-header-h, 64px
   background: rgba(1, 191, 253, .14); color: var(--lp-cyan); font-size: 13px; font-weight: 700;
 }
 .lp-chip__icon--wa { background: rgba(37, 211, 102, .14); color: #25d366; }
-.lp-chip--a { left: -18px; top: 26%; animation: lp-float 8s ease-in-out -2s infinite; }
+.lp-chip--a { left: -18px; top: 44%; animation: lp-float 8s ease-in-out -2s infinite; }
 .lp-chip--b { right: -10px; bottom: 6%; animation: lp-float 8s ease-in-out -6s infinite; }
 
 .lp-hud { position: absolute; width: 28px; height: 28px; border: 1.5px solid var(--lp-cyan); opacity: .8; pointer-events: none; }
@@ -318,6 +319,7 @@ html { scroll-behavior: smooth; scroll-padding-top: calc(var(--lp-header-h, 64px
   width: 700px; height: 700px; border-radius: 50%;
   background: radial-gradient(closest-side, rgba(1, 191, 253, .07), transparent);
 }
+.lp-product, .lp-plans-sec { overflow-x: clip; }
 .lp-product--obtra::after { left: -300px; top: 160px; }
 .lp-product--emptra::after { right: -300px; top: 240px; }
 
@@ -327,7 +329,7 @@ html { scroll-behavior: smooth; scroll-padding-top: calc(var(--lp-header-h, 64px
 }
 .lp-product__layout--rev { grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr); }
 .lp-product__shot { margin: 0; min-width: 0; }
-.lp-shot { padding: 10px; }
+.lp-shot { --frame-pad: 10px; }
 
 /* cartão de RDO (identidade do Obtra: marinho + âmbar) */
 .lp-rdo {
@@ -507,7 +509,7 @@ html { scroll-behavior: smooth; scroll-padding-top: calc(var(--lp-header-h, 64px
   background: radial-gradient(closest-side, rgba(1, 191, 253, .08), transparent); pointer-events: none;
 }
 .lp-plans { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; align-items: stretch; }
-.lp-plan { display: flex; flex-direction: column; padding: 28px 24px 24px; min-width: 0; }
+.lp-plan { --frame-pad: 28px 24px 24px; display: flex; flex-direction: column; min-width: 0; }
 .lp-plan--featured { transform: translateY(-10px); }
 .lp-plan__tag { margin: 0 0 14px; font-size: 10px; letter-spacing: .3em; text-transform: uppercase; color: var(--lp-cyan); }
 .lp-plan--featured .lp-plan__tag::after {
@@ -546,9 +548,7 @@ html { scroll-behavior: smooth; scroll-padding-top: calc(var(--lp-header-h, 64px
   content: ''; position: absolute; left: 5px; top: 5px; width: 6px; height: 3px;
   border-left: 1.5px solid var(--lp-cyan); border-bottom: 1.5px solid var(--lp-cyan); transform: rotate(-45deg);
 }
-.lp-custom__form { padding: 28px; }
-.lp-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 16px; }
-.lp-form-grid__full { grid-column: 1 / -1; }
+.lp-custom__form { --frame-pad: 28px; }
 .lp-hp { position: absolute !important; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
 .lp-lead-status:empty { display: none; }
 .lp-lead-status { margin: 4px 0 16px; }
@@ -589,7 +589,8 @@ html { scroll-behavior: smooth; scroll-padding-top: calc(var(--lp-header-h, 64px
    ========================================================================== */
 .lp-final { padding: 32px 0 104px; }
 .lp-final__box {
-  position: relative; overflow: hidden; text-align: center; padding: 56px 24px;
+  --frame-pad: 56px 24px;
+  position: relative; overflow: hidden; text-align: center;
   background:
     radial-gradient(ellipse 60% 120% at 50% 0%, rgba(1, 191, 253, .14), transparent 70%),
     var(--lp-surface);
@@ -676,16 +677,15 @@ html { scroll-behavior: smooth; scroll-padding-top: calc(var(--lp-header-h, 64px
   .lp-flow__step::after { display: none; }
   .lp-flow__step:last-child { grid-column: 1 / -1; }
   .lp-features { grid-template-columns: minmax(0, 1fr); }
-  .lp-shot { padding: 6px; }
+  .lp-shot { --frame-pad: 6px; }
   .lp-browser__bar { height: 20px; }
   .lp-browser__bar span { font-size: 9px; height: 13px; line-height: 13px; }
   .lp-product__foot { padding: 18px 16px; }
   .lp-product__buy, .lp-product__buy .btn { width: 100%; }
   .lp-steps { grid-template-columns: minmax(0, 1fr); }
-  .lp-custom__form { padding: 20px 16px; }
-  .lp-form-grid { grid-template-columns: minmax(0, 1fr); }
+  .lp-custom__form { --frame-pad: 20px 16px; }
   .lp-faq__q { font-size: 13.5px; }
-  .lp-final__box { padding: 40px 16px; }
+  .lp-final__box { --frame-pad: 40px 16px; }
   .lp-final__ctas .btn { width: 100%; }
   .lp-footer__inner { grid-template-columns: minmax(0, 1fr); }
 }
@@ -716,3 +716,6 @@ html { scroll-behavior: smooth; scroll-padding-top: calc(var(--lp-header-h, 64px
 .lp-404__box .lp-lead { margin: 0 auto 28px; max-width: 42ch; }
 .lp-404__box .lp-hero__ctas { justify-content: center; }
 .lp-404 .lp-header { background: rgba(5, 7, 11, .82); }
+
+/* links de navegação não sublinham (aqta.css sublinha a:hover) */
+.lp-nav__link:hover, .lp-footer__nav a:hover, .lp-hero__custom:hover, .lp-header__logo:hover, .lp-skip:hover { text-decoration: none; }
