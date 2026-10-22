@@ -270,7 +270,7 @@ function renderPending(d) {
   const isBoleto = /boleto|ticket/i.test(d.paymentMethod || d.payment_type || '');
   render(`
     <div class="ob-center">
-      <div class="ob-icon ob-icon--warn" aria-hidden="true">⏱</div>
+      <div class="ob-icon ob-icon--warn" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9.5 2.5h5"/></svg></div>
       <p class="eyebrow"><span class="badge badge--warn">${d.status === 'in_process' ? 'Em análise' : 'Aguardando pagamento'}</span></p>
       <h1 class="ob-title" id="ob-title" tabindex="-1">${d.status === 'in_process' ? 'Seu pagamento está em análise' : 'Estamos aguardando a confirmação'}</h1>
       <p class="ob-lead">${d.status === 'in_process'
@@ -279,8 +279,8 @@ function renderPending(d) {
     </div>
     ${summaryHTML(d)}
     <div class="ob-pix">
-      <div${isBoleto ? ' hidden' : ''}><h3>PIX</h3><p>Confirmado em segundos após o pagamento. Se ainda não pagou, use o QR Code ou o código copia-e-cola do Mercado Pago.</p></div>
-      <div${isPix ? ' hidden' : ''}><h3>Boleto</h3><p>A compensação leva até 3 dias úteis. Você receberá um e-mail quando for confirmado — pode fechar esta página.</p></div>
+      ${isBoleto ? '' : '<div><h3>PIX</h3><p>Confirmado em segundos após o pagamento. Se ainda não pagou, use o QR Code ou o código copia-e-cola do Mercado Pago.</p></div>'}
+      ${isPix ? '' : '<div><h3>Boleto</h3><p>A compensação leva até 3 dias úteis. Você receberá um e-mail quando for confirmado — pode fechar esta página.</p></div>'}
     </div>
     <div class="ob-center">
       <div class="ob-poll" id="ob-poll"><span class="ob-dot" aria-hidden="true"></span><span id="ob-poll-text">Verificando automaticamente…</span></div>

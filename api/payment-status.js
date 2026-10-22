@@ -1,5 +1,8 @@
-// GET /api/payment-status?payment_id=...[&external_reference=...]
+// GET /api/payment-status?payment_id=...&external_reference=...   (ambos obrigatórios)
 // A verdade vem do Mercado Pago (produção) ou de um token demo assinado — nunca dos parâmetros da URL de retorno.
+// external_reference (contém um uuid) é exigido e precisa bater com o do pagamento: impede que alguém enumere
+// ids numéricos do Mercado Pago para obter dados do cliente ou o accessToken.
+// Erros: 400 missing_payment_id | 400 missing_reference | 404 not_found/invalid_payment | 502 Mercado Pago.
 import crypto from 'node:crypto';
 import { send, allow, isDemo } from '../lib/http.js';
 import { getPlan, formatBRL } from '../lib/catalog.js';
@@ -134,14 +137,15 @@ export default async function handler(req, res) {
   const q = req.query || {};
   const paymentId = str(q.payment_id || q.collection_id, 9000);
   if (!paymentId || paymentId === 'null') return send(res, 400, { error: 'missing_payment_id' });
+  const givenRef = str(q.external_reference, 200);
+  if (!givenRef || givenRef === 'null') return send(res, 400, { error: 'missing_reference' });
 
   const r = await resolvePayment(paymentId);
   if (!r.ok) return send(res, r.code, { error: r.error });
   const p = r.payment;
 
-  // Se a página de retorno informar o external_reference, ele precisa bater com o do pagamento.
-  const givenRef = str(q.external_reference, 200);
-  if (givenRef && givenRef !== 'null' && givenRef !== p.externalReference) {
+  // O external_reference informado pela página de retorno precisa bater com o do pagamento.
+  if (givenRef !== p.externalReference) {
     return send(res, 404, { error: 'not_found' });
   }
 

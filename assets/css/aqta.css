@@ -29,7 +29,7 @@
      .badge (+ --ok --warn --err --muted)  selo de status com ponto
      .field                     wrapper de campo: <div class="field"><label>…</label><input>…<p class="field-error"></p></div>
        .field.has-error         estado de erro (borda vermelha; .field-error aparece)
-       .field-error             mensagem de erro (vazia = oculta)
+       .field-error             mensagem de erro (sempre reserva 17px de altura; vazia = invisível)
        .field-hint              texto de ajuda abaixo do campo
        .field--check            checkbox/radio com label na mesma linha
        .input-group             input + botão lado a lado (ex.: copiar senha)
@@ -546,7 +546,8 @@ html { scrollbar-color: #243041 var(--bg); scrollbar-width: thin; }
   background: var(--err);
   border-radius: 50%;
 }
-.field-error:empty { display: none; }
+.field-error { min-height: 17px; } /* reserva a linha: o erro não empurra o layout */
+.field-error:empty::before { display: none; }
 
 .field.has-error label, .field.has-error .field__label { color: #ffb3bc; }
 .field.has-error input:not([type="checkbox"]):not([type="radio"]),

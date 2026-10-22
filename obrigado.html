@@ -81,6 +81,7 @@
     /* Ícone de status (pendente/recusado/erro) */
     .ob-icon { width: 56px; height: 56px; margin: 0 auto 4px; display: grid; place-items: center; border-radius: 50%;
       border: 1px solid currentColor; font-size: 22px; line-height: 1; }
+    .ob-icon svg { width: 24px; height: 24px; }
     .ob-icon--warn { color: #f5b544; box-shadow: 0 0 22px rgba(245, 181, 68, .18) inset; }
     .ob-icon--err { color: #ff5d6c; box-shadow: 0 0 22px rgba(255, 93, 108, .16) inset; }
 
@@ -121,7 +122,7 @@
     .ob-form-alert { margin-top: 16px; }
 
     /* Pendente: contador */
-    .ob-pix { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 20px 0 0; text-align: left; }
+    .ob-pix { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin: 20px 0 0; text-align: left; }
     .ob-pix > div { border: 1px solid var(--line, #1c2633); border-radius: var(--radius, 10px); padding: 14px 16px;
       background: var(--surface-2, #101620); }
     .ob-pix h3 { margin: 0 0 6px; font-size: 12px; letter-spacing: .26em; text-transform: uppercase; color: var(--cyan, #01bffd); font-weight: 600; }
@@ -143,7 +144,7 @@
     @media (max-width: 560px) {
       .ob-card { padding: 26px 18px; }
       .ob-title { font-size: 17px; }
-      .ob-grid, .ob-pix, .ob-radios { grid-template-columns: minmax(0, 1fr); }
+      .ob-grid, .ob-radios { grid-template-columns: minmax(0, 1fr); }
       .ob-summary div { padding: 10px 12px; }
       .ob-step { letter-spacing: .14em; font-size: 10px; }
       .ob-actions .btn { flex: 1 1 100%; }
