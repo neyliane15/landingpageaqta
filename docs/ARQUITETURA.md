@@ -108,7 +108,8 @@ Entrada JSON: `{ product: "obtra"|"emptra", plan: "basico", customer: { name, em
   produção); retorna `{ redirect }` = `/obrigado?payment_id=<demoPaymentToken>&status=<outcome>&external_reference=<ref>`
   onde `demoPaymentToken` = `"demo_" + signToken({ t:"demopay", status, product, plan, customer, ref, amountCents }, 86400)`.
 
-### `GET /api/payment-status?payment_id=...` (PAY-B)
+### `GET /api/payment-status?payment_id=...&external_reference=...` (PAY-B)
+- `external_reference` é **obrigatório** (anti-enumeração): ausente ⇒ `400 missing_reference`; divergente ⇒ `404`.
 - Produção: `GET https://api.mercadopago.com/v1/payments/{id}` — **a verdade vem do Mercado Pago**, nunca dos
   parâmetros da URL de retorno. Confere `external_reference` começando com `aqta:`, valor pago ≥ preço do catálogo,
   moeda BRL.
