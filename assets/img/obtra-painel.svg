@@ -1,0 +1,212 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 800" width="1280" height="800" role="img" aria-label="Painel do Obtra: dashboard com obras em andamento e relatórios diários de obra">
+<defs>
+  <pattern id="mm" width="16" height="16" patternUnits="userSpaceOnUse"><path d="M16 0H0V16" fill="none" stroke="#FFFFFF" stroke-opacity=".035"/></pattern>
+  <linearGradient id="th1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9DB6E8"/><stop offset="1" stop-color="#173766"/></linearGradient>
+  <linearGradient id="th2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F6B462"/><stop offset="1" stop-color="#A85A08"/></linearGradient>
+  <linearGradient id="th3" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#C9D7F2"/><stop offset="1" stop-color="#5B82D6"/></linearGradient>
+</defs>
+<rect x="0" y="0" width="1280" height="800" fill="#F5F7FB"/>
+<rect x="0" y="0" width="232" height="800" fill="#0B1F3A"/>
+<rect x="0" y="0" width="232" height="800" fill="url(#mm)"/>
+<g transform="translate(20 22) scale(.5625)"><rect width="64" height="64" rx="15" fill="#06122A"/><rect x=".5" y=".5" width="63" height="63" rx="14.5" fill="none" stroke="#fff" stroke-opacity=".12"/><path d="M46 34 A15 15 0 1 1 31 19" fill="none" stroke="#fff" stroke-width="7.5"/><rect x="38" y="11" width="13" height="13" rx="2.5" fill="#F29A2E"/></g>
+<text x="66" y="38" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="13.5" font-weight="700" fill="#FFFFFF">Construtora Aurora</text>
+<text x="66" y="54" font-family="'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace" font-size="9" font-weight="600" fill="#F6B462" letter-spacing="2">OBTRA · RDO</text>
+<text x="24" y="96" font-family="'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace" font-size="8.5" font-weight="400" fill="#9DB6E8" letter-spacing="1.8" opacity="0.8">OPERAÇÃO</text>
+<line x1="84.8" y1="93" x2="216" y2="93" stroke="#fff" stroke-opacity=".12" stroke-dasharray="3 3"/>
+<rect x="14" y="106" width="204" height="30" rx="6" fill="#F29A2E" opacity="0.14"/>
+<rect x="2" y="112" width="3" height="18" rx="1.5" fill="#F29A2E"/>
+<rect x="26" y="115" width="12" height="12" rx="3" fill="none" stroke="#F6B462" stroke-width="1.4" opacity="1"/>
+<text x="48" y="125.5" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12" font-weight="500" fill="#F6B462" opacity="1">Dashboard</text>
+<rect x="26" y="146" width="12" height="12" rx="3" fill="none" stroke="#9DB6E8" stroke-width="1.4" opacity="0.6"/>
+<text x="48" y="156.5" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12" font-weight="500" fill="#C9D7F2" opacity="0.8">Obras</text>
+<rect x="26" y="177" width="12" height="12" rx="3" fill="none" stroke="#9DB6E8" stroke-width="1.4" opacity="0.6"/>
+<text x="48" y="187.5" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12" font-weight="500" fill="#C9D7F2" opacity="0.8">Relatórios (RDO)</text>
+<rect x="26" y="208" width="12" height="12" rx="3" fill="none" stroke="#9DB6E8" stroke-width="1.4" opacity="0.6"/>
+<text x="48" y="218.5" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12" font-weight="500" fill="#C9D7F2" opacity="0.8">Histórico</text>
+<text x="24" y="252" font-family="'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace" font-size="8.5" font-weight="400" fill="#9DB6E8" letter-spacing="1.8" opacity="0.8">CADASTROS</text>
+<line x1="92.39999999999999" y1="249" x2="216" y2="249" stroke="#fff" stroke-opacity=".12" stroke-dasharray="3 3"/>
+<rect x="26" y="271" width="12" height="12" rx="3" fill="none" stroke="#9DB6E8" stroke-width="1.4" opacity="0.6"/>
+<text x="48" y="281.5" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12" font-weight="500" fill="#C9D7F2" opacity="0.8">Mão de Obra</text>
+<rect x="26" y="302" width="12" height="12" rx="3" fill="none" stroke="#9DB6E8" stroke-width="1.4" opacity="0.6"/>
+<text x="48" y="312.5" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12" font-weight="500" fill="#C9D7F2" opacity="0.8">Funções</text>
+<rect x="26" y="333" width="12" height="12" rx="3" fill="none" stroke="#9DB6E8" stroke-width="1.4" opacity="0.6"/>
+<text x="48" y="343.5" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12" font-weight="500" fill="#C9D7F2" opacity="0.8">Materiais</text>
+<rect x="26" y="364" width="12" height="12" rx="3" fill="none" stroke="#9DB6E8" stroke-width="1.4" opacity="0.6"/>
+<text x="48" y="374.5" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12" font-weight="500" fill="#C9D7F2" opacity="0.8">Equipamentos</text>
+<text x="24" y="408" font-family="'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace" font-size="8.5" font-weight="400" fill="#9DB6E8" letter-spacing="1.8" opacity="0.8">GESTÃO</text>
+<line x1="69.6" y1="405" x2="216" y2="405" stroke="#fff" stroke-opacity=".12" stroke-dasharray="3 3"/>
+<rect x="26" y="427" width="12" height="12" rx="3" fill="none" stroke="#9DB6E8" stroke-width="1.4" opacity="0.6"/>
+<text x="48" y="437.5" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12" font-weight="500" fill="#C9D7F2" opacity="0.8">Relatórios &amp; Exportação</text>
+<rect x="26" y="458" width="12" height="12" rx="3" fill="none" stroke="#9DB6E8" stroke-width="1.4" opacity="0.6"/>
+<text x="48" y="468.5" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12" font-weight="500" fill="#C9D7F2" opacity="0.8">Usuários &amp; Clientes</text>
+<rect x="16" y="664" width="200" height="62" rx="8" fill="none" stroke="#FFFFFF" stroke-width="1" stroke-dasharray="3 3" opacity="0.3"/>
+<text x="28" y="684" font-family="'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace" font-size="8.5" font-weight="400" fill="#9DB6E8" letter-spacing="1">ARMAZENAMENTO</text>
+<text x="204" y="684" font-family="'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace" font-size="8.5" font-weight="400" fill="#9DB6E8" text-anchor="end">38%</text>
+<rect x="28" y="692" width="176" height="4" rx="2" fill="#FFFFFF" opacity="0.12"/>
+<rect x="28" y="692" width="66.88" height="4" rx="2" fill="#5B82D6"/>
+<text x="28" y="714" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#C9D7F2" opacity="0.75">780 MB de 2 GB</text>
+<circle cx="36" cy="760" r="15" fill="#2B55B8"/>
+<text x="36" y="764" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="10.5" font-weight="700" fill="#fff" text-anchor="middle">RM</text>
+<text x="60" y="757" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12" font-weight="600" fill="#fff">Ricardo Mendes</text>
+<text x="60" y="772" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#9DB6E8">Administrador</text>
+<text x="264" y="52" font-family="'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace" font-size="9.5" font-weight="400" fill="#627089" letter-spacing="1.6">QUINTA-FEIRA, 22 DE OUTUBRO</text>
+<text x="264" y="84" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="26" font-weight="800" fill="#0B1F3A">Olá, Ricardo</text>
+<text x="264" y="106" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#4A5A72">Resumo das obras da Construtora Aurora</text>
+<rect x="1030" y="62" width="102" height="34" rx="8" fill="#fff" stroke="#C8D2E1" stroke-width="1"/>
+<text x="1081" y="83.5" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="600" fill="#173766" text-anchor="middle">+  Nova obra</text>
+<rect x="1142" y="62" width="106" height="34" rx="8" fill="#F29A2E"/>
+<text x="1195" y="83.5" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="700" fill="#0B1F3A" text-anchor="middle">+  Novo RDO</text>
+<rect x="264" y="128" width="237" height="112" rx="9" fill="#0B1F3A" stroke="#10294D" stroke-width="1"/>
+<path d="M268 141V132H277 M488 132H497V141 M497 227V236H488 M277 236H268V227" fill="none" stroke="#F29A2E" stroke-width="1.6"/>
+<text x="280" y="154" font-family="'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace" font-size="9" font-weight="600" fill="#9DB6E8" letter-spacing="1.2">OBRAS EM ANDAMENTO</text>
+<rect x="461" y="141" width="26" height="26" rx="6" fill="#ffffff" opacity="0.1"/>
+<rect x="468" y="148" width="12" height="12" rx="3" fill="none" stroke="#F6B462" stroke-width="1.5"/>
+<text x="280" y="194" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="32" font-weight="800" fill="#fff">7</text>
+<text x="280" y="216" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="11.5" font-weight="400" fill="#C9D7F2">de 9 obras cadastradas</text>
+<text x="487" y="230" font-family="'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace" font-size="8.5" font-weight="400" fill="#5B82D6" text-anchor="end" letter-spacing="1.5">K-01</text>
+<rect x="513" y="128" width="237" height="112" rx="9" fill="#fff" stroke="#E1E7F0" stroke-width="1"/>
+<path d="M517 141V132H526 M737 132H746V141 M746 227V236H737 M526 236H517V227" fill="none" stroke="#C8D2E1" stroke-width="1.6"/>
+<text x="529" y="154" font-family="'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace" font-size="9" font-weight="600" fill="#627089" letter-spacing="1.2">RELATÓRIOS NO MÊS</text>
+<rect x="710" y="141" width="26" height="26" rx="6" fill="#F1F5FD" opacity="1"/>
+<rect x="717" y="148" width="12" height="12" rx="3" fill="none" stroke="#1E3A8A" stroke-width="1.5"/>
+<text x="529" y="194" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="32" font-weight="800" fill="#0B1F3A">46</text>
+<text x="529" y="216" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="11.5" font-weight="400" fill="#4A5A72">312 relatórios no total</text>
+<text x="736" y="230" font-family="'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace" font-size="8.5" font-weight="400" fill="#C9D7F2" text-anchor="end" letter-spacing="1.5">K-02</text>
+<rect x="762" y="128" width="237" height="112" rx="9" fill="#fff" stroke="#F6B462" stroke-width="1"/>
+<path d="M766 141V132H775 M986 132H995V141 M995 227V236H986 M775 236H766V227" fill="none" stroke="#F29A2E" stroke-width="1.6"/>
+<text x="778" y="154" font-family="'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace" font-size="9" font-weight="600" fill="#627089" letter-spacing="1.2">PENDENTES DE APROVAÇÃO</text>
+<rect x="959" y="141" width="26" height="26" rx="6" fill="#FFF7EC" opacity="1"/>
+<rect x="966" y="148" width="12" height="12" rx="3" fill="none" stroke="#A85A08" stroke-width="1.5"/>
+<text x="778" y="194" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="32" font-weight="800" fill="#0B1F3A">3</text>
+<text x="778" y="216" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="11.5" font-weight="400" fill="#4A5A72">Aguardando o administrador</text>
+<text x="985" y="230" font-family="'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace" font-size="8.5" font-weight="400" fill="#C9D7F2" text-anchor="end" letter-spacing="1.5">K-03</text>
+<rect x="1011" y="128" width="237" height="112" rx="9" fill="#fff" stroke="#E1E7F0" stroke-width="1"/>
+<path d="M1015 141V132H1024 M1235 132H1244V141 M1244 227V236H1235 M1024 236H1015V227" fill="none" stroke="#C8D2E1" stroke-width="1.6"/>
+<text x="1027" y="154" font-family="'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace" font-size="9" font-weight="600" fill="#627089" letter-spacing="1.2">ARMAZENAMENTO</text>
+<rect x="1208" y="141" width="26" height="26" rx="6" fill="#F1F5FD" opacity="1"/>
+<rect x="1215" y="148" width="12" height="12" rx="3" fill="none" stroke="#1E3A8A" stroke-width="1.5"/>
+<text x="1027" y="194" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="32" font-weight="800" fill="#0B1F3A">38</text>
+<text x="1065" y="194" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="16" font-weight="700" fill="#627089">%</text>
+<rect x="1027" y="206" width="205" height="5" rx="2.5" fill="#E4ECFA"/>
+<rect x="1027" y="206" width="77.9" height="5" rx="2.5" fill="#2B55B8"/>
+<text x="1027" y="227" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="11" font-weight="400" fill="#4A5A72">780 MB de 2 GB</text>
+<text x="1234" y="230" font-family="'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace" font-size="8.5" font-weight="400" fill="#C9D7F2" text-anchor="end" letter-spacing="1.5">K-04</text>
+<rect x="264" y="262" width="560" height="510" rx="10" fill="#fff" stroke="#E1E7F0" stroke-width="1"/>
+<text x="282" y="292" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="14" font-weight="700" fill="#0B1F3A">Obras em andamento</text>
+<text x="441.20000000000005" y="292" font-family="'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace" font-size="8.5" font-weight="400" fill="#9DB6E8" letter-spacing="1.5">A-01</text>
+<text x="806" y="292" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12" font-weight="500" fill="#1E3A8A" text-anchor="end">Ver todas ↗</text>
+<line x1="264" y1="310" x2="824" y2="310" stroke="#E1E7F0"/>
+<rect x="282" y="325" width="44" height="44" rx="7" fill="url(#th1)"/>
+<path d="M292 359l8-12 6 7 5-5 7 10z" fill="#fff" fill-opacity=".55"/>
+<text x="340" y="340" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="13" font-weight="600" fill="#0F1B2D">Residencial Vila Atlântica</text>
+<text x="806" y="340" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="11" font-weight="400" fill="#627089" text-anchor="end">Incorporadora Mar Azul</text>
+<rect x="340" y="350" width="466" height="5" rx="2.5" fill="#E4ECFA"/>
+<rect x="340" y="350" width="275.7166666666667" height="5" rx="2.5" fill="#2B55B8"/>
+<text x="340" y="370" font-family="'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace" font-size="10.5" font-weight="400" fill="#4A5A72">Dia 142 de 240</text>
+<text x="806" y="370" font-family="'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace" font-size="10.5" font-weight="400" fill="#4A5A72" text-anchor="end">98 dias a vencer</text>
+<line x1="264" y1="385" x2="824" y2="385" stroke="#C8D2E1" stroke-opacity=".7" stroke-dasharray="3 3"/>
+<rect x="282" y="400" width="44" height="44" rx="7" fill="url(#th2)"/>
+<path d="M292 434l8-12 6 7 5-5 7 10z" fill="#fff" fill-opacity=".55"/>
+<text x="340" y="415" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="13" font-weight="600" fill="#0F1B2D">Edifício Mirante do Parque</text>
+<text x="806" y="415" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="11" font-weight="400" fill="#627089" text-anchor="end">Grupo Horizonte</text>
+<rect x="340" y="425" width="466" height="5" rx="2.5" fill="#E4ECFA"/>
+<rect x="340" y="425" width="333.9666666666667" height="5" rx="2.5" fill="#2B55B8"/>
+<text x="340" y="445" font-family="'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace" font-size="10.5" font-weight="400" fill="#4A5A72">Dia 301 de 420</text>
+<text x="806" y="445" font-family="'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace" font-size="10.5" font-weight="400" fill="#4A5A72" text-anchor="end">119 dias a vencer</text>
+<line x1="264" y1="460" x2="824" y2="460" stroke="#C8D2E1" stroke-opacity=".7" stroke-dasharray="3 3"/>
+<rect x="282" y="475" width="44" height="44" rx="7" fill="url(#th3)"/>
+<path d="M292 509l8-12 6 7 5-5 7 10z" fill="#fff" fill-opacity=".55"/>
+<text x="340" y="490" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="13" font-weight="600" fill="#0F1B2D">Galpão Logístico BR-101</text>
+<text x="806" y="490" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="11" font-weight="400" fill="#627089" text-anchor="end">LogSul Armazéns</text>
+<rect x="340" y="500" width="466" height="5" rx="2.5" fill="#E4ECFA"/>
+<rect x="340" y="500" width="227.82222222222222" height="5" rx="2.5" fill="#2B55B8"/>
+<text x="340" y="520" font-family="'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace" font-size="10.5" font-weight="400" fill="#4A5A72">Dia 88 de 180</text>
+<text x="806" y="520" font-family="'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace" font-size="10.5" font-weight="400" fill="#4A5A72" text-anchor="end">92 dias a vencer</text>
+<line x1="264" y1="535" x2="824" y2="535" stroke="#C8D2E1" stroke-opacity=".7" stroke-dasharray="3 3"/>
+<rect x="282" y="550" width="44" height="44" rx="7" fill="url(#th2)"/>
+<path d="M292 584l8-12 6 7 5-5 7 10z" fill="#fff" fill-opacity=".55"/>
+<text x="340" y="565" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="13" font-weight="600" fill="#0F1B2D">Clínica Santa Helena — Reforma</text>
+<text x="806" y="565" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="11" font-weight="400" fill="#627089" text-anchor="end">Clínica Santa Helena</text>
+<rect x="340" y="575" width="466" height="5" rx="2.5" fill="#E4ECFA"/>
+<rect x="340" y="575" width="396.09999999999997" height="5" rx="2.5" fill="#F29A2E"/>
+<text x="340" y="595" font-family="'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace" font-size="10.5" font-weight="400" fill="#4A5A72">Dia 51 de 60</text>
+<text x="806" y="595" font-family="'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace" font-size="10.5" font-weight="400" fill="#A85A08" text-anchor="end">9 dias a vencer</text>
+<line x1="264" y1="610" x2="824" y2="610" stroke="#C8D2E1" stroke-opacity=".7" stroke-dasharray="3 3"/>
+<rect x="282" y="625" width="44" height="44" rx="7" fill="url(#th1)"/>
+<path d="M292 659l8-12 6 7 5-5 7 10z" fill="#fff" fill-opacity=".55"/>
+<text x="340" y="640" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="13" font-weight="600" fill="#0F1B2D">Condomínio Jardim das Águas</text>
+<text x="806" y="640" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="11" font-weight="400" fill="#627089" text-anchor="end">Construtora Aurora</text>
+<rect x="340" y="650" width="466" height="5" rx="2.5" fill="#E4ECFA"/>
+<rect x="340" y="650" width="47.23835616438356" height="5" rx="2.5" fill="#2B55B8"/>
+<text x="340" y="670" font-family="'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace" font-size="10.5" font-weight="400" fill="#4A5A72">Dia 37 de 365</text>
+<text x="806" y="670" font-family="'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace" font-size="10.5" font-weight="400" fill="#4A5A72" text-anchor="end">328 dias a vencer</text>
+<line x1="264" y1="685" x2="824" y2="685" stroke="#C8D2E1" stroke-opacity=".7" stroke-dasharray="3 3"/>
+<rect x="282" y="700" width="44" height="44" rx="7" fill="url(#th3)"/>
+<path d="M292 734l8-12 6 7 5-5 7 10z" fill="#fff" fill-opacity=".55"/>
+<text x="340" y="715" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="13" font-weight="600" fill="#0F1B2D">Escola Municipal Nova Era</text>
+<text x="806" y="715" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="11" font-weight="400" fill="#627089" text-anchor="end">Prefeitura de Maricá</text>
+<rect x="340" y="725" width="466" height="5" rx="2.5" fill="#E4ECFA"/>
+<rect x="340" y="725" width="400.76" height="5" rx="2.5" fill="#F29A2E"/>
+<text x="340" y="745" font-family="'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace" font-size="10.5" font-weight="400" fill="#4A5A72">Dia 129 de 150</text>
+<text x="806" y="745" font-family="'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace" font-size="10.5" font-weight="400" fill="#4A5A72" text-anchor="end">21 dias a vencer</text>
+<rect x="844" y="262" width="404" height="510" rx="10" fill="#fff" stroke="#E1E7F0" stroke-width="1"/>
+<text x="862" y="292" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="14" font-weight="700" fill="#0B1F3A">Relatórios recentes</text>
+<text x="1029.6" y="292" font-family="'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace" font-size="8.5" font-weight="400" fill="#9DB6E8" letter-spacing="1.5">A-02</text>
+<text x="1230" y="292" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12" font-weight="500" fill="#1E3A8A" text-anchor="end">Todos ↗</text>
+<line x1="844" y1="310" x2="1248" y2="310" stroke="#E1E7F0"/>
+<rect x="860" y="328" width="52" height="22" rx="5" fill="#F1F5FD" stroke="#C9D7F2" stroke-width="1"/>
+<text x="886" y="343" font-family="'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace" font-size="10" font-weight="600" fill="#173766" text-anchor="middle">RD-128</text>
+<text x="924" y="338" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12" font-weight="600" fill="#0F1B2D">Residencial Vila Atlântica</text>
+<circle cx="930" cy="354" r="4" fill="none" stroke="#F29A2E" stroke-width="1.5"/>
+<text x="942" y="358" font-family="'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace" font-size="10.5" font-weight="400" fill="#627089">22/10 · qui</text>
+<rect x="1164.8" y="331" width="67.2" height="20" rx="10" fill="#E8F6F0"/>
+<text x="1198.4" y="345" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="10" font-weight="600" fill="#13795B" text-anchor="middle">Aprovado</text>
+<line x1="844" y1="374" x2="1248" y2="374" stroke="#C8D2E1" stroke-opacity=".7" stroke-dasharray="3 3"/>
+<rect x="860" y="392" width="52" height="22" rx="5" fill="#F1F5FD" stroke="#C9D7F2" stroke-width="1"/>
+<text x="886" y="407" font-family="'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace" font-size="10" font-weight="600" fill="#173766" text-anchor="middle">RD-127</text>
+<text x="924" y="402" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12" font-weight="600" fill="#0F1B2D">Edifício Mirante do Parque</text>
+<path d="M924 421h11a3 3 0 0 0 0-6 4.5 4.5 0 0 0-8.5-1A3.4 3.4 0 0 0 924 421z" fill="none" stroke="#5B82D6" stroke-width="1.4"/>
+<text x="942" y="422" font-family="'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace" font-size="10.5" font-weight="400" fill="#627089">22/10 · qui</text>
+<rect x="1105.8" y="395" width="126.2" height="20" rx="10" fill="#FFF6E5"/>
+<text x="1168.9" y="409" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="10" font-weight="600" fill="#9A6412" text-anchor="middle">Pendente Aprovação</text>
+<line x1="844" y1="438" x2="1248" y2="438" stroke="#C8D2E1" stroke-opacity=".7" stroke-dasharray="3 3"/>
+<rect x="860" y="456" width="52" height="22" rx="5" fill="#F1F5FD" stroke="#C9D7F2" stroke-width="1"/>
+<text x="886" y="471" font-family="'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace" font-size="10" font-weight="600" fill="#173766" text-anchor="middle">RD-126</text>
+<text x="924" y="466" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12" font-weight="600" fill="#0F1B2D">Galpão Logístico BR-101</text>
+<circle cx="930" cy="482" r="4" fill="none" stroke="#F29A2E" stroke-width="1.5"/>
+<text x="942" y="486" font-family="'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace" font-size="10.5" font-weight="400" fill="#627089">21/10 · qua</text>
+<rect x="1164.8" y="459" width="67.2" height="20" rx="10" fill="#E8F6F0"/>
+<text x="1198.4" y="473" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="10" font-weight="600" fill="#13795B" text-anchor="middle">Aprovado</text>
+<line x1="844" y1="502" x2="1248" y2="502" stroke="#C8D2E1" stroke-opacity=".7" stroke-dasharray="3 3"/>
+<rect x="860" y="520" width="52" height="22" rx="5" fill="#F1F5FD" stroke="#C9D7F2" stroke-width="1"/>
+<text x="886" y="535" font-family="'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace" font-size="10" font-weight="600" fill="#173766" text-anchor="middle">RD-125</text>
+<text x="924" y="530" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12" font-weight="600" fill="#0F1B2D">Clínica Santa Helena</text>
+<path d="M924 547h11a3 3 0 0 0 0-6 4.5 4.5 0 0 0-8.5-1A3.4 3.4 0 0 0 924 547z M927 550l-1 3 M931 550l-1 3" fill="none" stroke="#2B55B8" stroke-width="1.4"/>
+<text x="942" y="550" font-family="'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace" font-size="10.5" font-weight="400" fill="#627089">21/10 · qua</text>
+<rect x="1164.8" y="523" width="67.2" height="20" rx="10" fill="#EEF1F6"/>
+<text x="1198.4" y="537" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="10" font-weight="600" fill="#4A5A72" text-anchor="middle">Rascunho</text>
+<line x1="844" y1="566" x2="1248" y2="566" stroke="#C8D2E1" stroke-opacity=".7" stroke-dasharray="3 3"/>
+<rect x="860" y="584" width="52" height="22" rx="5" fill="#F1F5FD" stroke="#C9D7F2" stroke-width="1"/>
+<text x="886" y="599" font-family="'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace" font-size="10" font-weight="600" fill="#173766" text-anchor="middle">RD-124</text>
+<text x="924" y="594" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12" font-weight="600" fill="#0F1B2D">Residencial Vila Atlântica</text>
+<path d="M924 613h11a3 3 0 0 0 0-6 4.5 4.5 0 0 0-8.5-1A3.4 3.4 0 0 0 924 613z" fill="none" stroke="#5B82D6" stroke-width="1.4"/>
+<text x="942" y="614" font-family="'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace" font-size="10.5" font-weight="400" fill="#627089">21/10 · qua</text>
+<rect x="1164.8" y="587" width="67.2" height="20" rx="10" fill="#E8F6F0"/>
+<text x="1198.4" y="601" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="10" font-weight="600" fill="#13795B" text-anchor="middle">Aprovado</text>
+<line x1="844" y1="630" x2="1248" y2="630" stroke="#C8D2E1" stroke-opacity=".7" stroke-dasharray="3 3"/>
+<rect x="860" y="648" width="52" height="22" rx="5" fill="#F1F5FD" stroke="#C9D7F2" stroke-width="1"/>
+<text x="886" y="663" font-family="'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace" font-size="10" font-weight="600" fill="#173766" text-anchor="middle">RD-123</text>
+<text x="924" y="658" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12" font-weight="600" fill="#0F1B2D">Escola Municipal Nova Era</text>
+<circle cx="930" cy="674" r="4" fill="none" stroke="#F29A2E" stroke-width="1.5"/>
+<text x="942" y="678" font-family="'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace" font-size="10.5" font-weight="400" fill="#627089">20/10 · ter</text>
+<rect x="1164.8" y="651" width="67.2" height="20" rx="10" fill="#E8F6F0"/>
+<text x="1198.4" y="665" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="10" font-weight="600" fill="#13795B" text-anchor="middle">Aprovado</text>
+<line x1="844" y1="694" x2="1248" y2="694" stroke="#C8D2E1" stroke-opacity=".7" stroke-dasharray="3 3"/>
+<rect x="860" y="712" width="52" height="22" rx="5" fill="#F1F5FD" stroke="#C9D7F2" stroke-width="1"/>
+<text x="886" y="727" font-family="'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace" font-size="10" font-weight="600" fill="#173766" text-anchor="middle">RD-122</text>
+<text x="924" y="722" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12" font-weight="600" fill="#0F1B2D">Condomínio Jardim das Águas</text>
+<circle cx="930" cy="738" r="4" fill="none" stroke="#F29A2E" stroke-width="1.5"/>
+<text x="942" y="742" font-family="'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace" font-size="10.5" font-weight="400" fill="#627089">20/10 · ter</text>
+<rect x="1105.8" y="715" width="126.2" height="20" rx="10" fill="#FFF6E5"/>
+<text x="1168.9" y="729" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="10" font-weight="600" fill="#9A6412" text-anchor="middle">Pendente Aprovação</text>
+</svg>

@@ -1,0 +1,128 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 800" width="1280" height="800" role="img" aria-label="Painel do Emptra: comparativo item a item das propostas recebidas pelo WhatsApp">
+<rect x="0" y="0" width="1280" height="800" fill="#F7FAF9"/>
+<rect x="0" y="0" width="240" height="800" fill="#0C2F2C"/>
+<line x1="240" y1="0" x2="240" y2="800" stroke="#1B4541"/>
+<line x1="0" y1="64" x2="240" y2="64" stroke="#1B4541"/>
+<g transform="translate(22 14) scale(.75)"><path d="M30 10H14v28h13" fill="none" stroke="#E7EFED" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 24h22.5" stroke="#2BC4B0" stroke-width="5" stroke-linecap="round"/></g>
+<text x="64" y="41" font-family="Newsreader, Georgia, 'Times New Roman', serif" font-size="22" font-weight="600" fill="#fff">Emptra</text>
+<text x="34" y="100" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="500" fill="#B9CCC8" opacity="0.75">Compras</text>
+<rect x="30" y="123" width="14" height="14" rx="3" fill="none" stroke="#B9CCC8" stroke-width="1.5" opacity="0.7"/>
+<text x="56" y="135" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="13" font-weight="400" fill="#D5E2DF">Meu painel</text>
+<rect x="12" y="152" width="216" height="36" rx="6" fill="#153F3B"/>
+<rect x="12" y="156" width="3" height="28" rx="1.5" fill="#2BC4B0"/>
+<rect x="30" y="163" width="14" height="14" rx="3" fill="none" stroke="#2BC4B0" stroke-width="1.5" opacity="1"/>
+<text x="56" y="175" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="13" font-weight="500" fill="#fff">Minhas cotações</text>
+<rect x="30" y="203" width="14" height="14" rx="3" fill="none" stroke="#B9CCC8" stroke-width="1.5" opacity="0.7"/>
+<text x="56" y="215" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="13" font-weight="400" fill="#D5E2DF">Fornecedores</text>
+<rect x="30" y="243" width="14" height="14" rx="3" fill="none" stroke="#B9CCC8" stroke-width="1.5" opacity="0.7"/>
+<text x="56" y="255" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="13" font-weight="400" fill="#D5E2DF">Histórico de preços</text>
+<line x1="0" y1="728" x2="240" y2="728" stroke="#1B4541"/>
+<circle cx="40" cy="764" r="16" fill="#153F3B" stroke="#2BC4B0" stroke-opacity=".5"/>
+<text x="40" y="768" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="11" font-weight="500" fill="#fff" text-anchor="middle">MC</text>
+<text x="66" y="760" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="500" fill="#fff">Marina Costa</text>
+<text x="66" y="776" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="11" font-weight="400" fill="#B9CCC8">Comprador · Atelier Vertical</text>
+<rect x="241" y="0" width="1039" height="64" fill="#fff"/>
+<line x1="240" y1="64" x2="1280" y2="64" stroke="#D3DEDB"/>
+<text x="272" y="38" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="13" font-weight="400" fill="#6E7E7C">Minhas cotações  /  COT-2026-0012</text>
+<path d="M1170 26a6 6 0 0 1 12 0v5l2 3h-16l2-3z M1173 37a3 3 0 0 0 6 0" fill="none" stroke="#3C4A48" stroke-width="1.5"/>
+<circle cx="1183" cy="24" r="4" fill="#12A594"/>
+<circle cx="1224" cy="32" r="15" fill="#E7EFED"/>
+<text x="1224" y="36" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="11" font-weight="500" fill="#0C2F2C" text-anchor="middle">MC</text>
+<text x="272" y="112" font-family="Newsreader, Georgia, 'Times New Roman', serif" font-size="26" font-weight="600" fill="#0A1614">Hidráulica das prumadas — Bloco B</text>
+<text x="272" y="136" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#6E7E7C">COT-2026-0012 · criada em 16/09/2026 · Residencial Icaraí · entrega em Niterói</text>
+<rect x="272" y="150" width="152" height="24" rx="12" fill="#F6EAD2"/>
+<text x="348" y="166" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="11.5" font-weight="500" fill="#7A5307" text-anchor="middle">Aguardando aprovação</text>
+<rect x="432" y="150" width="198" height="24" rx="12" fill="#fff" stroke="#D3DEDB" stroke-width="1"/>
+<text x="531" y="166" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="11.5" font-weight="500" fill="#3C4A48" text-anchor="middle">Prioriza: Entrega mais rápida</text>
+<rect x="1000" y="92" width="116" height="36" rx="6" fill="#fff" stroke="#D3DEDB" stroke-width="1"/>
+<text x="1058" y="115" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="13" font-weight="500" fill="#0A1614" text-anchor="middle">Baixar XLSX</text>
+<rect x="1124" y="92" width="124" height="36" rx="6" fill="#12A594"/>
+<text x="1186" y="115" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="13" font-weight="500" fill="#fff" text-anchor="middle">Aprovar cotação</text>
+<rect x="272" y="194" width="235" height="92" rx="8" fill="#fff" stroke="#D3DEDB" stroke-width="1"/>
+<text x="288" y="220" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#6E7E7C">Propostas recebidas</text>
+<text x="288" y="250" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="22" font-weight="500" fill="#0A1614">3 de 4</text>
+<text x="288" y="271" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="11.5" font-weight="400" fill="#6E7E7C">Respondidas pelo WhatsApp</text>
+<rect x="519" y="194" width="235" height="92" rx="8" fill="#fff" stroke="#D3DEDB" stroke-width="1"/>
+<text x="535" y="220" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#6E7E7C">Melhor proposta</text>
+<text x="535" y="250" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="22" font-weight="500" fill="#0A1614">R$ 4.043,80</text>
+<text x="535" y="271" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="11.5" font-weight="400" fill="#6E7E7C">Hidra Materiais · entrega em 2 dias</text>
+<rect x="766" y="194" width="235" height="92" rx="8" fill="#fff" stroke="#D3DEDB" stroke-width="1"/>
+<text x="782" y="220" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#6E7E7C">Economia estimada</text>
+<text x="782" y="250" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="22" font-weight="500" fill="#0A5B51">R$ 402,60</text>
+<text x="782" y="271" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="11.5" font-weight="400" fill="#6E7E7C">Contra a proposta mais cara</text>
+<rect x="1013" y="194" width="235" height="92" rx="8" fill="#fff" stroke="#D3DEDB" stroke-width="1"/>
+<text x="1029" y="220" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#6E7E7C">Prazo de resposta</text>
+<text x="1029" y="250" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="22" font-weight="500" fill="#0A1614">Encerrado</text>
+<text x="1029" y="271" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="11.5" font-weight="400" fill="#6E7E7C">20/09/2026 às 18:00</text>
+<rect x="272" y="306" width="976" height="470" rx="8" fill="#fff" stroke="#D3DEDB" stroke-width="1"/>
+<text x="292" y="338" font-family="Newsreader, Georgia, 'Times New Roman', serif" font-size="19" font-weight="600" fill="#0A1614">Comparativo item a item</text>
+<text x="292" y="358" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12" font-weight="400" fill="#6E7E7C">Melhor preço de cada item destacado · aprove um fornecedor ou divida a compra</text>
+<rect x="1098" y="326" width="130" height="30" rx="6" fill="#fff" stroke="#D3DEDB" stroke-width="1"/>
+<text x="1163" y="345.5" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12" font-weight="500" fill="#3C4A48" text-anchor="middle">Compra dividida</text>
+<rect x="273" y="376" width="974" height="36" fill="#E7EFED"/>
+<text x="292" y="399" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="500" fill="#3C4A48">Item</text>
+<text x="692" y="399" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="500" fill="#3C4A48" text-anchor="end">Qtd</text>
+<text x="876" y="399" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="500" fill="#3C4A48" text-anchor="end">Hidra Materiais</text>
+<text x="1048" y="399" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="500" fill="#3C4A48" text-anchor="end">Casa do Construtor</text>
+<text x="1220" y="399" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="500" fill="#3C4A48" text-anchor="end">Depósito Lagos</text>
+<line x1="273" y1="450" x2="1247" y2="450" stroke="#D3DEDB"/>
+<text x="292" y="436" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#0A1614">Tubo PVC soldável 25mm — barra 6m</text>
+<text x="692" y="436" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#3C4A48" text-anchor="end">100 br</text>
+<rect x="724" y="418" width="160" height="26" rx="5" fill="#D5F0EB"/>
+<text x="876" y="436" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="500" fill="#0A5B51" text-anchor="end">R$ 18,90</text>
+<text x="1048" y="436" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#0A1614" text-anchor="end">R$ 19,40</text>
+<text x="1220" y="436" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#0A1614" text-anchor="end">R$ 20,10</text>
+<line x1="273" y1="488" x2="1247" y2="488" stroke="#D3DEDB"/>
+<text x="292" y="474" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#0A1614">Joelho 90° PVC 25mm</text>
+<text x="692" y="474" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#3C4A48" text-anchor="end">400 un</text>
+<text x="876" y="474" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#0A1614" text-anchor="end">R$ 1,32</text>
+<rect x="896" y="456" width="160" height="26" rx="5" fill="#D5F0EB"/>
+<text x="1048" y="474" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="500" fill="#0A5B51" text-anchor="end">R$ 1,25</text>
+<text x="1220" y="474" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#0A1614" text-anchor="end">R$ 1,48</text>
+<line x1="273" y1="526" x2="1247" y2="526" stroke="#D3DEDB"/>
+<text x="292" y="512" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#0A1614">Registro esfera 25mm</text>
+<text x="692" y="512" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#3C4A48" text-anchor="end">25 un</text>
+<rect x="724" y="494" width="160" height="26" rx="5" fill="#D5F0EB"/>
+<text x="876" y="512" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="500" fill="#0A5B51" text-anchor="end">R$ 38,50</text>
+<text x="1048" y="512" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#0A1614" text-anchor="end">R$ 41,00</text>
+<text x="1220" y="512" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#0A1614" text-anchor="end">R$ 42,90</text>
+<line x1="273" y1="564" x2="1247" y2="564" stroke="#D3DEDB"/>
+<text x="292" y="550" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#0A1614">Tê soldável PVC 25mm</text>
+<text x="692" y="550" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#3C4A48" text-anchor="end">150 un</text>
+<text x="876" y="550" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#0A1614" text-anchor="end">R$ 1,95</text>
+<text x="1048" y="550" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#0A1614" text-anchor="end">R$ 2,10</text>
+<rect x="1068" y="532" width="160" height="26" rx="5" fill="#D5F0EB"/>
+<text x="1220" y="550" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="500" fill="#0A5B51" text-anchor="end">R$ 1,89</text>
+<line x1="273" y1="602" x2="1247" y2="602" stroke="#D3DEDB"/>
+<text x="292" y="588" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#0A1614">Adesivo plástico PVC 175g</text>
+<text x="692" y="588" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#3C4A48" text-anchor="end">12 un</text>
+<rect x="724" y="570" width="160" height="26" rx="5" fill="#D5F0EB"/>
+<text x="876" y="588" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="500" fill="#0A5B51" text-anchor="end">R$ 14,90</text>
+<text x="1048" y="588" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#0A1614" text-anchor="end">R$ 15,50</text>
+<text x="1220" y="588" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#0A1614" text-anchor="end">R$ 16,20</text>
+<line x1="273" y1="640" x2="1247" y2="640" stroke="#D3DEDB"/>
+<text x="292" y="626" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#0A1614">Fita veda rosca 18mm × 50m</text>
+<text x="692" y="626" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#3C4A48" text-anchor="end">30 un</text>
+<rect x="724" y="608" width="160" height="26" rx="5" fill="#D5F0EB"/>
+<text x="876" y="626" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="500" fill="#0A5B51" text-anchor="end">R$ 6,40</text>
+<text x="1048" y="626" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12" font-weight="400" fill="#8C2F27" text-anchor="end" opacity="0.8">Sem estoque</text>
+<text x="1220" y="626" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#0A1614" text-anchor="end">R$ 6,80</text>
+<line x1="273" y1="678" x2="1247" y2="678" stroke="#D3DEDB"/>
+<text x="292" y="664" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#3C4A48">Frete</text>
+<text x="876" y="664" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#0A1614" text-anchor="end">Grátis</text>
+<text x="1048" y="664" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#0A1614" text-anchor="end">R$ 120,00</text>
+<text x="1220" y="664" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#0A1614" text-anchor="end">R$ 90,00</text>
+<line x1="273" y1="716" x2="1247" y2="716" stroke="#D3DEDB"/>
+<text x="292" y="702" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#3C4A48">Prazo de entrega</text>
+<text x="876" y="702" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#0A1614" text-anchor="end">2 dias</text>
+<text x="1048" y="702" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#0A1614" text-anchor="end">5 dias</text>
+<text x="1220" y="702" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#0A1614" text-anchor="end">3 dias</text>
+<rect x="273" y="716" width="974" height="38" fill="#F7FAF9"/>
+<line x1="273" y1="754" x2="1247" y2="754" stroke="#D3DEDB"/>
+<text x="292" y="740" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="500" fill="#0A1614">Total da proposta</text>
+<rect x="724" y="722" width="160" height="26" rx="5" fill="#D5F0EB"/>
+<path d="M734 741l-2-9 5 4 3-6 3 6 5-4-2 9z" fill="#0A5B51"/>
+<text x="876" y="740" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="500" fill="#0A5B51" text-anchor="end">R$ 4.043,80</text>
+<text x="1048" y="740" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="500" fill="#0A1614" text-anchor="end">R$ 4.086,00</text>
+<text x="1220" y="740" font-family="Inter, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12.5" font-weight="500" fill="#0A1614" text-anchor="end">R$ 4.446,40</text>
+</svg>

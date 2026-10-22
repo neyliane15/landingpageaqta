@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="no-referrer">
+  <title>Pagamento (demonstração) — Aqta</title>
+  <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Michroma&display=swap" rel="stylesheet">
+  <style>
+    /* Base mínima de segurança (antes de aqta.css, que prevalece): mantém a página legível se o CSS falhar. */
+    html { background: #05070b; }
+    body { margin: 0; background: var(--bg, #05070b); color: var(--text, #e8edf3);
+      font: 14px/1.5 var(--font-body, Inter, system-ui, -apple-system, "Segoe UI", sans-serif); }
+  </style>
+  <link rel="stylesheet" href="/assets/css/aqta.css">
+  <style>
+    /* Estilos exclusivos do checkout demo (prefixo .cd-). Componentes base vêm de aqta.css. */
+    .cd-banner {
+      position: sticky; top: 0; z-index: 10;
+      display: flex; align-items: center; justify-content: center; gap: .6em;
+      padding: 8px 16px; text-align: center;
+      font: 600 11px/1.4 var(--font-body, Inter, system-ui, sans-serif); letter-spacing: .22em; text-transform: uppercase;
+      color: #05070b; background: repeating-linear-gradient(135deg, #01bffd 0 14px, #00e0ff 14px 28px);
+    }
+    .cd-banner span { background: #05070b; color: #00e0ff; padding: 2px 8px; border-radius: 3px; letter-spacing: .12em; }
+    .cd-wrap { width: min(980px, 100% - 32px); margin: 28px auto 48px; }
+    .cd-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
+    .cd-head .logo img { height: 34px; width: auto; display: block; }
+    .cd-secure { font-size: 12px; color: var(--muted, #8a94a3); display: inline-flex; align-items: center; gap: 6px; }
+    .cd-secure svg { width: 14px; height: 14px; color: var(--cyan, #01bffd); }
+    .cd-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr); gap: 18px; align-items: start; }
+    .cd-card { padding: 22px; }
+    .cd-title { font-family: var(--font-display, Michroma, sans-serif); font-size: 15px; letter-spacing: .06em; margin: 6px 0 16px; color: var(--text, #e8edf3); }
+    .cd-list { margin: 0; display: grid; gap: 0; font-size: 13px; }
+    .cd-list > div { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px dashed rgba(1, 191, 253, .18); }
+    .cd-list dt { color: var(--muted, #8a94a3); }
+    .cd-list dd { margin: 0; text-align: right; color: var(--text, #e8edf3); overflow-wrap: anywhere; }
+    .cd-total { display: flex; justify-content: space-between; align-items: baseline; margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(1, 191, 253, .45); }
+    .cd-total span { font-size: 12px; color: var(--muted, #8a94a3); letter-spacing: .2em; text-transform: uppercase; }
+    .cd-total strong { font-family: var(--font-display, Michroma, sans-serif); font-size: 20px; color: var(--cyan-glow, #00e0ff); }
+    .cd-total small { font-size: 12px; color: var(--muted, #8a94a3); }
+    .cd-note { font-size: 12px; color: var(--muted, #8a94a3); margin: 14px 0 0; line-height: 1.55; }
+    .cd-tabs { display: flex; gap: 6px; border-bottom: 1px solid rgba(1, 191, 253, .25); margin-bottom: 18px; }
+    .cd-tab {
+      appearance: none; background: transparent; border: 1px solid transparent; border-bottom: 0; cursor: pointer;
+      padding: 9px 16px; font: 600 12px/1 var(--font-body, Inter, sans-serif); letter-spacing: .2em; text-transform: uppercase;
+      color: var(--muted, #8a94a3); border-radius: 6px 6px 0 0; position: relative; top: 1px;
+    }
+    .cd-tab[aria-selected="true"] { color: var(--cyan-glow, #00e0ff); border-color: rgba(1, 191, 253, .45); background: var(--surface-2, #101620); }
+    .cd-tab:focus-visible { outline: 2px solid var(--cyan, #01bffd); outline-offset: 2px; }
+    .cd-pix { display: grid; grid-template-columns: 168px minmax(0, 1fr); gap: 18px; align-items: start; }
+    .cd-qr { position: relative; width: 168px; height: 168px; padding: 10px; background: #fff; border-radius: 6px;
+      box-shadow: 0 0 0 1px rgba(1, 191, 253, .6), 0 0 24px rgba(1, 191, 253, .18); }
+    .cd-qr svg { width: 100%; height: 100%; display: block; }
+    .cd-qr::after { content: 'DEMO'; position: absolute; inset: auto 0 50% 0; transform: translateY(50%) rotate(-18deg); text-align: center;
+      font: 700 15px/1 var(--font-display, Michroma, sans-serif); letter-spacing: .3em; color: rgba(1, 132, 198, .85); text-shadow: 0 0 6px #fff, 0 0 2px #fff; }
+    .cd-steps { margin: 0 0 12px; padding-left: 18px; font-size: 13px; color: var(--muted, #8a94a3); line-height: 1.6; }
+    .cd-copy { display: flex; gap: 8px; }
+    .cd-copy input { flex: 1; min-width: 0; font: 12px/1.2 ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .cd-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .cd-fields .cd-span { grid-column: 1 / -1; }
+    .cd-actions { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 10px; margin-top: 20px; padding-top: 18px; border-top: 1px dashed rgba(1, 191, 253, .25); }
+    .cd-actions-label { grid-column: 1 / -1; margin: 0 0 2px; }
+    .cd-btn-reject { border-color: rgba(255, 92, 92, .55) !important; color: #ff8a8a !important; }
+    .cd-state { text-align: center; padding: 48px 22px; }
+    .cd-state p { font-size: 14px; color: var(--muted, #8a94a3); }
+    .cd-foot { text-align: center; font-size: 12px; color: var(--muted, #8a94a3); margin-top: 22px; }
+    [hidden] { display: none !important; }
+    @media (max-width: 760px) {
+      .cd-grid { grid-template-columns: minmax(0, 1fr); }
+      .cd-actions { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 460px) {
+      .cd-pix { grid-template-columns: 1fr; justify-items: center; }
+      .cd-fields { grid-template-columns: 1fr; }
+      .cd-card { padding: 18px 16px; }
+      .cd-banner { letter-spacing: .12em; font-size: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="cd-banner" role="note">Ambiente de demonstração — <span>nenhum valor será cobrado</span></div>
+
+  <div class="page-shell">
+    <div class="cd-wrap">
+      <header class="cd-head page-shell__header">
+        <a class="logo" href="/" aria-label="Aqta — página inicial">
+          <img src="/assets/img/logo-aqta.svg" alt="Aqta" width="125" height="34">
+        </a>
+        <span class="cd-secure">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          Checkout simulado · Aqta
+        </span>
+      </header>
+
+      <main id="cd-main" aria-live="polite">
+        <section id="cd-loading" class="frame cd-state">
+          <span class="spinner" aria-hidden="true"></span>
+          <p>Carregando seu pedido…</p>
+        </section>
+
+        <section id="cd-error" class="frame cd-state" hidden>
+          <p class="eyebrow">Pedido indisponível</p>
+          <h1 class="cd-title">Link de pagamento inválido ou expirado</h1>
+          <div class="alert alert--err" id="cd-error-msg">Este link de pagamento de demonstração não é válido ou já expirou (validade de 1 hora).</div>
+          <p>Volte aos planos e inicie a compra novamente.</p>
+          <a class="btn btn--primary" href="/#planos">Ver planos</a>
+        </section>
+
+        <div id="cd-checkout" class="cd-grid" hidden>
+          <section class="frame cd-card" aria-labelledby="cd-summary-title">
+            <p class="eyebrow">Resumo do pedido</p>
+            <h1 class="cd-title" id="cd-summary-title"><span data-f="productName">—</span></h1>
+            <dl class="cd-list">
+              <div><dt>Produto</dt><dd data-f="productName">—</dd></div>
+              <div><dt>Plano</dt><dd data-f="planName">—</dd></div>
+              <div><dt>Cobrança</dt><dd data-f="billing">—</dd></div>
+              <div><dt>Cliente</dt><dd data-f="customerName">—</dd></div>
+              <div><dt>E-mail</dt><dd data-f="customerEmail">—</dd></div>
+              <div id="cd-company-row"><dt>Empresa</dt><dd data-f="customerCompany">—</dd></div>
+            </dl>
+            <div class="cd-total"><span>Total</span><div><strong data-f="amount">—</strong> <small data-f="interval"></small></div></div>
+            <p class="cd-note">Pedido <code data-f="ref">—</code><br>Este link expira às <span data-f="expires">—</span>.</p>
+          </section>
+
+          <section class="frame frame--glow cd-card" aria-labelledby="cd-pay-title">
+            <p class="eyebrow">Forma de pagamento</p>
+            <h2 class="cd-title" id="cd-pay-title">Como você quer pagar?</h2>
+
+            <div class="cd-tabs" role="tablist" aria-label="Formas de pagamento">
+              <button class="cd-tab" role="tab" id="tab-pix" aria-controls="panel-pix" aria-selected="true">PIX</button>
+              <button class="cd-tab" role="tab" id="tab-card" aria-controls="panel-card" aria-selected="false" tabindex="-1">Cartão</button>
+            </div>
+
+            <div role="tabpanel" id="panel-pix" aria-labelledby="tab-pix">
+              <div class="cd-pix">
+                <div class="cd-qr" id="cd-qr" role="img" aria-label="QR code PIX fictício (demonstração)"></div>
+                <div>
+                  <ol class="cd-steps">
+                    <li>Abra o app do seu banco e escolha <strong>Pagar com PIX</strong>.</li>
+                    <li>Escaneie o QR code ou use o código copia e cola.</li>
+                    <li>Aqui é demonstração: use os botões abaixo para simular o resultado.</li>
+                  </ol>
+                  <div class="field">
+                    <label for="cd-pix-code">PIX copia e cola (fictício)</label>
+                    <div class="cd-copy">
+                      <input id="cd-pix-code" type="text" readonly>
+                      <button type="button" class="btn btn--ghost btn--sm" id="cd-copy-btn">Copiar</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div role="tabpanel" id="panel-card" aria-labelledby="tab-card" hidden>
+              <div class="alert alert--warn">Demonstração: não digite dados reais de cartão. Nada aqui é enviado.</div>
+              <form class="cd-fields" id="cd-card-form" autocomplete="off" onsubmit="return false">
+                <div class="field cd-span"><label for="cc-number">Número do cartão</label><input id="cc-number" inputmode="numeric" placeholder="4242 4242 4242 4242" autocomplete="off"></div>
+                <div class="field cd-span"><label for="cc-name">Nome impresso no cartão</label><input id="cc-name" placeholder="NOME SOBRENOME" autocomplete="off"></div>
+                <div class="field"><label for="cc-exp">Validade</label><input id="cc-exp" inputmode="numeric" placeholder="MM/AA" autocomplete="off"></div>
+                <div class="field"><label for="cc-cvv">CVV</label><input id="cc-cvv" inputmode="numeric" placeholder="123" autocomplete="off"></div>
+                <div class="field cd-span"><label for="cc-inst">Parcelas</label><select id="cc-inst"><option data-f="installment">1x</option></select></div>
+              </form>
+            </div>
+
+            <div class="cd-actions">
+              <p class="eyebrow cd-actions-label">Simular resultado</p>
+              <button type="button" class="btn btn--primary" data-outcome="approved">Aprovar pagamento</button>
+              <button type="button" class="btn btn--ghost" data-outcome="pending">Deixar pendente</button>
+              <button type="button" class="btn btn--ghost cd-btn-reject" data-outcome="rejected">Recusar</button>
+            </div>
+            <div class="alert alert--err" id="cd-pay-error" role="alert" hidden></div>
+          </section>
+        </div>
+      </main>
+
+      <p class="cd-foot">Em produção, este passo é feito no Mercado Pago (PIX, cartão ou boleto).</p>
+    </div>
+  </div>
+
+  <script type="module" src="/assets/js/checkout-demo.js"></script>
+</body>
+</html>
