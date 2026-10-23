@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <title>Aqta</title>
+  <defs>
+    <radialGradient id="bg" cx="512" cy="470" r="640" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0f1824"/><stop offset=".55" stop-color="#080c12"/><stop offset="1" stop-color="#05070b"/>
+    </radialGradient>
+    <radialGradient id="glow" cx="512" cy="512" r="400" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#01bffd" stop-opacity=".16"/><stop offset="1" stop-color="#01bffd" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="ring" x1="0" y1="0" x2="1024" y2="1024" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#01bffd" stop-opacity=".85"/><stop offset=".5" stop-color="#01bffd" stop-opacity=".08"/><stop offset="1" stop-color="#01bffd" stop-opacity=".6"/>
+    </linearGradient>
+    <linearGradient id="tail" x1="459" y1="132" x2="577" y2="210" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#00e0ff"/><stop offset="1" stop-color="#01bffd"/></linearGradient>
+    <mask id="qcut" maskUnits="userSpaceOnUse" x="340" y="30" width="250" height="190"><rect x="340" y="30" width="250" height="190" fill="#fff"/><path d="M404.3,100 L496.3,100 L630.7,240 L538.7,240 Z" fill="#000"/></mask>
+    <filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="10"/></filter>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#bg)"/>
+  <rect width="1024" height="1024" fill="url(#glow)"/>
+  <circle cx="512" cy="512" r="470" fill="none" stroke="url(#ring)" stroke-width="3"/>
+  <g transform="translate(-447.30 260.73) scale(2.05)">
+    <path d="M459,132 L503,132 L577.9,210 L533.9,210 Z" fill="#01bffd" opacity=".55" filter="url(#soft)"/>
+    <path d="M406,41 H527 A48,48 0 0 1 575,89 V151 A48,48 0 0 1 527,199 H406 A48,48 0 0 1 358,151 V89 A48,48 0 0 1 406,41 Z M408,74 A16,16 0 0 0 392,90 V150 A16,16 0 0 0 408,166 H525 A16,16 0 0 0 541,150 V90 A16,16 0 0 0 525,74 Z" fill="#f4f6f9" fill-rule="evenodd" mask="url(#qcut)"/>
+    <path d="M459,132 L503,132 L577.9,210 L533.9,210 Z" fill="url(#tail)"/>
+  </g>
+</svg>
