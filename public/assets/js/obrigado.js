@@ -1,15 +1,17 @@
 // Página /obrigado — retorno do pagamento (Mercado Pago ou gateway demo) e ativação do acesso.
 // Máquina de estados: loading → approved | pending | rejected | error.
 // A verdade vem sempre de GET /api/payment-status (nunca do ?status= da URL de retorno).
+import { loadSupport, applySupportLinks, waAttrs } from './support.js';
 
 const POLL_INTERVAL_MS = 5000;
 const POLL_WINDOW_MS = 10 * 60 * 1000;
 const REQUEST_TIMEOUT_MS = 15000;
+const IN_PROGRESS_RETRY_MS = 3000; // 409 in_progress: outra requisição está ativando este pagamento
+const IN_PROGRESS_MAX_RETRIES = 5;
 
 const $state = document.getElementById('ob-state');
 const $announce = document.getElementById('ob-announce');
 const $steps = document.getElementById('ob-steps');
-const SUPPORT_WA = (document.body.dataset.supportWhatsapp || '').replace(/\D/g, '');
 
 const params = new URLSearchParams(location.search);
 const paymentId = (params.get('payment_id') || params.get('collection_id') || '').trim();
@@ -28,11 +30,6 @@ const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
 }[c]));
 const digits = (v) => String(v ?? '').replace(/\D/g, '');
-
-function waLink(text) {
-  const base = SUPPORT_WA ? `https://wa.me/${SUPPORT_WA}` : 'https://wa.me/';
-  return `${base}?text=${encodeURIComponent(text)}`;
-}
 
 function storage(key, value) {
   try {
@@ -74,6 +71,7 @@ function setSteps(payment, activation = 'todo', access = 'todo') {
 function render(html, { announce, focus = true, busy = false } = {}) {
   $state.setAttribute('aria-busy', String(busy));
   $state.innerHTML = html;
+  applySupportLinks($state);
   if (announce) {
     $announce.textContent = '';
     // pequeno atraso para leitores de tela perceberem a troca de texto
@@ -109,7 +107,7 @@ function renderError({ title, message, retry = true }) {
       <p class="page-shell__lead">${message}</p>
       <div class="page-shell__actions">
         ${retry ? '<button type="button" class="btn btn--primary" data-action="retry">Tentar novamente</button>' : ''}
-        <a class="btn btn--ghost" href="${esc(waLink(`Olá! Preciso de ajuda com meu pagamento na Aqta.${validId ? ` Código: ${paymentId.slice(0, 40)}` : ''}`))}" target="_blank" rel="noopener">Falar com o suporte</a>
+        <a class="btn btn--ghost" ${waAttrs(`Olá! Preciso de ajuda com meu pagamento na Aqta.${validId ? ` Código: ${paymentId.slice(0, 40)}` : ''}`)}>Falar com o suporte</a>
         ${retry ? '' : '<a class="btn btn--ghost" href="/#planos">Ver planos</a>'}
       </div>
     </div>`, { announce: title });
@@ -124,7 +122,7 @@ function summaryHTML(d) {
     <dl class="ob-summary">
       <div><dt>Produto</dt><dd>${esc(d.productName || d.product || '—')}</dd></div>
       <div><dt>Plano</dt><dd>${esc(d.planName || planLabel(d.plan))}</dd></div>
-      <div><dt>Valor</dt><dd class="ob-amount">${esc(d.amount || '—')}<small>por mês</small></dd></div>
+      <div><dt>Valor</dt><dd class="ob-amount">${esc(d.amount || '—')}<small>1 mês de uso · pré-pago</small></dd></div>
       <div><dt>Cliente</dt><dd>${esc(who)}${sub ? `<small>${esc(sub)}</small>` : ''}</dd></div>
     </dl>`;
 }
@@ -261,7 +259,7 @@ function activationFormHTML(d, product) {
       </div>
       <div id="ob-form-alert" role="alert" aria-live="assertive"></div>
       <button type="submit" class="btn btn--primary btn--block">Ativar meu acesso</button>
-      <p class="ob-note" style="text-align:center">Ao ativar, você concorda com os termos de uso do ${esc(d.productName || product)}.</p>
+      <p class="ob-note ob-note--center">Ao ativar, você concorda com os <a href="/termos" target="_blank" rel="noopener">Termos de Uso e Contratação</a> e com a <a href="/privacidade" target="_blank" rel="noopener">Política de Privacidade</a> da Aqta.</p>
     </form>`;
 }
 
@@ -281,14 +279,14 @@ function renderPending(d) {
     ${summaryHTML(d)}
     <div class="ob-methods">
       ${isBoleto ? '' : '<div><h3>PIX</h3><p>Confirmado em segundos após o pagamento. Se ainda não pagou, use o QR Code ou o código copia-e-cola do Mercado Pago.</p></div>'}
-      ${isPix ? '' : '<div><h3>Boleto</h3><p>A compensação leva até 3 dias úteis. Você receberá um e-mail quando for confirmado — pode fechar esta página.</p></div>'}
+      ${isPix ? '' : '<div><h3>Boleto</h3><p>A compensação leva até 3 dias úteis. O Mercado Pago envia o comprovante para o seu e-mail quando o pagamento for compensado — pode fechar esta página e voltar por este mesmo link.</p></div>'}
     </div>
     <div class="ob-center">
       <p class="ob-poll" id="ob-poll"><span class="ob-dot" aria-hidden="true"></span><span id="ob-poll-text">Verificando automaticamente…</span></p>
       <div class="ob-meter" aria-hidden="true"><i id="ob-meter"></i></div>
       <div class="page-shell__actions">
         <button type="button" class="btn btn--primary" data-action="check">Já paguei — verificar agora</button>
-        <a class="btn btn--ghost" href="${esc(waLink(`Olá! Fiz o pagamento do ${d.productName || 'sistema Aqta'} e ele ainda aparece como pendente.`))}" target="_blank" rel="noopener">Falar com o suporte</a>
+        <a class="btn btn--ghost" ${waAttrs(`Olá! Fiz o pagamento do ${d.productName || 'sistema Aqta'} e ele ainda aparece como pendente.`)}>Falar com o suporte</a>
       </div>
       <p class="ob-note">Guarde este link: você pode voltar a esta página a qualquer momento para continuar a ativação.</p>
     </div>`, { announce: 'Pagamento pendente. Verificaremos automaticamente a cada 5 segundos.' });
@@ -333,7 +331,7 @@ function renderRejected(d) {
     <div class="ob-center">
       <div class="page-shell__actions">
         <a class="btn btn--primary" href="/#planos">Tentar novamente</a>
-        <a class="btn btn--ghost" href="${esc(waLink(`Olá! Meu pagamento do ${d.productName || 'sistema Aqta'} não foi aprovado. Podem me ajudar?`))}" target="_blank" rel="noopener">Suporte no WhatsApp</a>
+        <a class="btn btn--ghost" ${waAttrs(`Olá! Meu pagamento do ${d.productName || 'sistema Aqta'} não foi aprovado. Podem me ajudar?`)}>Falar com o suporte</a>
       </div>
       <p class="ob-note">Dica: o PIX é aprovado na hora e não depende de limite do cartão.</p>
     </div>`, { announce: `${title}. ${reason}` });
@@ -460,7 +458,7 @@ async function refresh({ silent = false } = {}) {
   if (!res.ok) {
     if (silent && current) return 'error'; // falha transitória durante polling: mantém a tela
     if (res.status === 400) {
-      renderError({ title: 'Não encontramos o código do pagamento', message: 'O link de retorno está incompleto. Se você concluiu o pagamento, fale com a gente pelo WhatsApp que liberamos seu acesso.', retry: false });
+      renderError({ title: 'Não encontramos o código do pagamento', message: 'O link de retorno está incompleto. Se você concluiu o pagamento, fale com o suporte da Aqta que liberamos seu acesso.', retry: false });
     } else if (res.status === 404) {
       renderError({ title: 'Pagamento não encontrado', message: 'Não localizamos este pagamento entre os pedidos da Aqta. Confira se abriu o link correto ou fale com o suporte.', retry: true });
     } else if (res.network) {
@@ -639,14 +637,22 @@ function wireForm(d, product) {
     btn.textContent = 'Ativando seu acesso…';
     $announce.textContent = 'Ativando seu acesso, aguarde.';
 
-    const res = await request('/api/onboarding', {
+    const send = () => request('/api/onboarding', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json' }, // obrigatório: o servidor responde 415 sem JSON
       body: JSON.stringify(payload),
     });
+    let res = await send();
+    // 409 in_progress: a ativação deste pagamento já está em andamento (ex.: duplo envio) — tenta de novo sozinho.
+    for (let attempt = 1; res.status === 409 && res.data?.error === 'in_progress' && attempt <= IN_PROGRESS_MAX_RETRIES; attempt++) {
+      btn.textContent = `Ativação em andamento… (nova tentativa ${attempt} de ${IN_PROGRESS_MAX_RETRIES})`;
+      $announce.textContent = 'A ativação já está em andamento. Tentando novamente em alguns segundos.';
+      await new Promise((r) => setTimeout(r, IN_PROGRESS_RETRY_MS));
+      res = await send();
+    }
 
     const r = res.data || {};
-    if ((res.ok && r.ok) || r.alreadyDone) {
+    if ((res.ok && (r.ok || r.mode === 'demo')) || r.alreadyDone) {
       const token = r.accessToken || d.accessToken;
       storage('aqta.access', token);
       if (r.tempPassword) storage('aqta.tempPassword', r.tempPassword);
@@ -670,23 +676,30 @@ function wireForm(d, product) {
       first?.focus();
       return;
     }
-    if (res.status === 401 || res.status === 403 || r.error === 'invalid_token' || r.error === 'expired_token') {
+    if (res.status === 402 || r.error === 'payment_not_active') {
+      msg = 'Este pagamento não está mais ativo (foi reembolsado, estornado ou contestado), então não é possível ativar o acesso. Se acha que é um engano, fale com o suporte.';
+      btn.disabled = true;
+      btn.setAttribute('aria-disabled', 'true');
+      setSteps('err', 'err');
+    } else if (res.status === 409 && r.error === 'in_progress') {
+      msg = 'A ativação ainda está em andamento. Aguarde alguns segundos e toque em “Ativar meu acesso” de novo — não haverá cobrança em dobro.';
+    } else if (res.status === 415) {
+      msg = 'Não conseguimos enviar os dados. Atualize a página e tente novamente.';
+    } else if (res.status === 401 || res.status === 403 || r.error === 'invalid_token' || r.error === 'expired_token') {
       msg = 'O link de ativação expirou. Fale com o suporte para liberarmos seu acesso — seu pagamento está garantido.';
     } else if (res.network) {
       msg = 'Sem conexão com o servidor. Verifique sua internet e tente novamente.';
     } else {
       msg = r.message || 'Não conseguimos ativar agora. Tente novamente em instantes ou fale com o suporte.';
     }
-    alertBox.innerHTML = `<p class="alert alert--err">${esc(msg)} <a href="${esc(waLink('Olá! Tive um problema ao ativar meu acesso na Aqta.'))}" target="_blank" rel="noopener">Falar com o suporte</a></p>`;
+    alertBox.innerHTML = `<p class="alert alert--err">${esc(msg)} <a ${waAttrs('Olá! Tive um problema ao ativar meu acesso na Aqta.')}>Falar com o suporte</a></p>`;
   });
 }
 
 // ---------------------------------------------------------------- início
 
-const supportLink = document.getElementById('ob-support-link');
-if (supportLink) supportLink.href = waLink('Olá! Tenho uma dúvida sobre minha contratação na Aqta.');
-const supportNav = document.getElementById('ob-support-nav');
-if (supportNav) supportNav.href = waLink('Olá! Tenho uma dúvida sobre minha contratação na Aqta.');
+// Canal de suporte vem do servidor (/api/catalog → support); até lá os links apontam para o contato do site.
+loadSupport().then(() => applySupportLinks(document));
 
 if (!validId) {
   renderError({
@@ -697,7 +710,7 @@ if (!validId) {
 } else if (!extRef) {
   renderError({
     title: 'Link de retorno incompleto',
-    message: 'Este link não traz todos os dados do pedido, então não conseguimos confirmar o pagamento por aqui. Fale com o suporte pelo WhatsApp — liberamos seu acesso rapidamente.',
+    message: 'Este link não traz todos os dados do pedido, então não conseguimos confirmar o pagamento por aqui. Fale com o suporte da Aqta — liberamos seu acesso rapidamente.',
     retry: false,
   });
 } else {

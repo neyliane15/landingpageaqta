@@ -1,3 +1,5 @@
+import { loadSupport, applySupportLinks } from './support.js';
+
 // Aqta · landing page — menu mobile, header ao rolar, scroll reveal, link ativo,
 // FAQ acessível, preços do catálogo e envio do formulário de sistema personalizado.
 
@@ -131,6 +133,9 @@ document.querySelectorAll('[data-faq]').forEach((faq) => {
   } catch { /* mantém os valores escritos no HTML */ }
 })();
 
+/* ------------------------------------- WhatsApp da Aqta (rodapé, FAQ, sob medida) */
+loadSupport().then(() => applySupportLinks(document));
+
 /* ----------------------------------------------------------- ano no rodapé */
 document.querySelectorAll('[data-year]').forEach((el) => { el.textContent = String(new Date().getFullYear()); });
 
@@ -170,9 +175,11 @@ if (form) {
     return e;
   };
 
+  // O conteúdo vai num <div> próprio: .alert é flex e, sem o wrapper, texto e botão viravam colunas (BUG-4).
   const showStatus = (kind, html) => {
-    status.innerHTML = `<div class="alert alert--${kind}">${html}</div>`;
+    status.innerHTML = `<div class="alert alert--${kind}"><div>${html}</div></div>`;
   };
+  const safeWa = (u) => (u && /^https:\/\/(wa\.me|api\.whatsapp\.com)\//.test(u) ? u : '');
 
   // máscara leve de telefone
   const wa = form.elements.whatsapp;
@@ -218,7 +225,7 @@ if (form) {
 
       if (res.ok && data.ok) {
         form.reset();
-        const waLink = data.whatsappUrl && /^https:\/\/(wa\.me|api\.whatsapp\.com)\//.test(data.whatsappUrl) ? data.whatsappUrl : '';
+        const waLink = safeWa(data.whatsappUrl);
         showStatus(
           'ok',
           `<strong>Pedido enviado!</strong> A equipe Aqta vai responder em até 1 dia útil.` +
@@ -238,7 +245,9 @@ if (form) {
         return;
       }
       if (res.status === 429) {
-        showStatus('err', 'Muitos envios seguidos. Aguarde um minuto e tente de novo.');
+        const waLink = safeWa(data.whatsappUrl);
+        showStatus('err', 'Muitos envios seguidos. Aguarde um minuto e tente de novo.' +
+          (waLink ? `<br><a class="btn btn--ghost btn--sm" href="${waLink.replace(/"/g, '&quot;')}" target="_blank" rel="noopener">Falar agora no WhatsApp</a>` : ''));
         return;
       }
       throw new Error(`HTTP ${res.status}`);

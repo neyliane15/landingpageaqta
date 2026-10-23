@@ -1,7 +1,7 @@
 // Gateway de pagamento SIMULADO (somente modo demo — sem MP_ACCESS_TOKEN).
 // GET  /api/demo-pay?ref=<token>                      ⇒ resumo verificado do pedido (para checkout-demo.html)
 // POST /api/demo-pay { ref, outcome }                 ⇒ { redirect } para /obrigado com um payment_id demo assinado
-import { send, allow, body, isDemo } from '../lib/http.js';
+import { send, allow, readJson, isDemo } from '../lib/http.js';
 import { getPlan, formatBRL } from '../lib/catalog.js';
 import { signToken, verifyToken } from '../lib/token.js';
 
@@ -56,7 +56,8 @@ export default async function handler(req, res) {
     });
   }
 
-  const b = body(req);
+  const b = readJson(req, res, { maxChars: 8192 }); // 415 / 413 / 400 invalid_json
+  if (!b) return;
   const outcome = str(b.outcome, 20);
   if (!OUTCOMES.includes(outcome)) return send(res, 400, { error: 'invalid_outcome' });
   const order = readOrder(b.ref);

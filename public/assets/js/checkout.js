@@ -119,27 +119,7 @@ const FIELDS = [
   { name: 'company', label: 'Empresa', type: 'text', autocomplete: 'organization', maxlength: 120, required: false, hint: 'opcional' },
 ];
 
-const STYLE = `
-#${MODAL_ID} .co-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px}
-#${MODAL_ID} .co-title{margin:4px 0 0;font-size:16px;line-height:1.3}
-#${MODAL_ID} .co-summary{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:12px 14px;margin:0 0 12px}
-#${MODAL_ID} .co-summary__name{font-size:14px;font-weight:600}
-#${MODAL_ID} .co-summary__tag{font-size:12px;color:var(--muted)}
-#${MODAL_ID} .co-summary__price{font-size:18px;font-weight:700;white-space:nowrap}
-#${MODAL_ID} .co-summary__price small{font-size:12px;font-weight:400;color:var(--muted)}
-#${MODAL_ID} .co-secure{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);margin:0 0 12px}
-#${MODAL_ID} .co-secure svg{flex:none;color:var(--cyan)}
-#${MODAL_ID} .co-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px}
-#${MODAL_ID} .co-grid .co-full{grid-column:1/-1}
-#${MODAL_ID} .co-hint{font-weight:400;color:var(--muted);text-transform:none;letter-spacing:0}
-#${MODAL_ID} .co-terms{display:flex;gap:8px;align-items:flex-start;font-size:12px;color:var(--muted);margin:12px 0 4px;line-height:1.5}
-#${MODAL_ID} .co-terms input{margin-top:2px;accent-color:var(--cyan);flex:none}
-#${MODAL_ID} .co-foot{font-size:12px;color:var(--muted);text-align:center;margin:10px 0 0}
-#${MODAL_ID} .co-actions{margin-top:12px}
-#${MODAL_ID} .co-alert{margin:0 0 12px;font-size:13px}
-#${MODAL_ID} [hidden]{display:none!important}
-@media (max-width:520px){#${MODAL_ID} .co-grid{grid-template-columns:1fr}}
-`;
+const STYLESHEET = '/assets/css/checkout.css';
 
 const LOCK_ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
 
@@ -159,15 +139,17 @@ function el(tag, attrs = {}, html) {
 
 function buildModal() {
   if (dialog) return dialog;
-  const style = el('style', { 'data-checkout-style': true }, STYLE);
-  document.head.appendChild(style);
+  // Estilos em arquivo (CSP sem 'unsafe-inline'); a landing já os carrega no <head>, aqui é só garantia.
+  if (!document.querySelector(`link[href="${STYLESHEET}"]`)) {
+    document.head.appendChild(el('link', { rel: 'stylesheet', href: STYLESHEET, 'data-checkout-style': true }));
+  }
 
   dialog = el('dialog', { class: 'modal', id: MODAL_ID, 'aria-labelledby': 'co-title', 'aria-describedby': 'co-secure' });
   dialog.innerHTML = `
     <div class="modal__dialog frame">
       <div class="co-head">
         <div>
-          <p class="eyebrow">Assinatura</p>
+          <p class="eyebrow">Plano mensal pré-pago</p>
           <h2 class="co-title" id="co-title">Finalizar compra</h2>
         </div>
         <button type="button" class="modal__close" data-co-close aria-label="Fechar">&times;</button>
@@ -196,7 +178,7 @@ function buildModal() {
         </div>
         <label class="co-terms">
           <input type="checkbox" name="terms" id="co-terms" required aria-describedby="co-terms-err">
-          <span>Concordo com a contratação da assinatura mensal e com o uso dos meus dados para emissão da cobrança e ativação do acesso.</span>
+          <span>Li e concordo com os <a href="/termos" target="_blank" rel="noopener">Termos de Uso e Contratação</a> e com a <a href="/privacidade" target="_blank" rel="noopener">Política de Privacidade</a>. Entendo que o plano é pré-pago: este pagamento cobre 1 mês de uso, sem débito automático, e a renovação é feita com um novo pagamento.</span>
         </label>
         <p class="field-error" id="co-terms-err" aria-live="polite"></p>
         <div class="co-actions">
@@ -286,7 +268,7 @@ function setBusy(busy) {
 async function renderSummary(productId, planId) {
   els.name.textContent = 'Carregando…';
   els.tag.textContent = '';
-  els.price.innerHTML = '<span class="spinner" aria-hidden="true"></span><span class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Carregando preço</span>';
+  els.price.innerHTML = '<span class="spinner" aria-hidden="true"></span><span class="sr-only">Carregando preço</span>';
   try {
     const cat = await loadCatalog();
     if (current.product !== productId) return; // outro produto foi aberto nesse meio-tempo
@@ -295,7 +277,7 @@ async function renderSummary(productId, planId) {
     if (!product || !plan) {
       els.name.textContent = 'Plano indisponível';
       els.price.textContent = '';
-      setError('Este plano não está disponível no momento. Fale com a Aqta pelo WhatsApp.');
+      setError('Este plano não está disponível no momento. Fale com a Aqta pelo formulário de contato do site.');
       els.submit.disabled = true;
       return;
     }
@@ -375,7 +357,7 @@ async function onSubmit(e) {
       showErrors(data.fields);
       setError('Revise os campos destacados.');
     } else if (data.error === 'invalid_product') {
-      setError('Este plano não está disponível no momento. Fale com a Aqta pelo WhatsApp.');
+      setError('Este plano não está disponível no momento. Fale com a Aqta pelo formulário de contato do site.');
     } else {
       setError(data.message || 'Não foi possível iniciar o pagamento. Tente novamente em instantes.');
     }

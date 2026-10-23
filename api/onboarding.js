@@ -1,28 +1,47 @@
 // /api/onboarding — ativação do acesso após o pagamento aprovado.
 //
-// POST { accessToken, company, document, responsible, loginEmail, whatsapp, extra }
-//   → 200 { ok, mode, product, productName, loginUrl, loginEmail, tempPassword?, accessToken, manualDeadline?, supportWhatsappUrl }
-//   → 200 { ok, alreadyDone: true, ... } se o token já for de um onboarding concluído
-//   → 400 { error: 'validation', fields } | 401 { error: 'invalid_token'|'expired_token' }
-// GET ?token=… → 200 dados públicos do token (para a página /acesso) | 401
+// POST { accessToken, company, document, responsible, loginEmail, whatsapp, extra }   (Content-Type: application/json)
+//   → 200 { ok, mode: 'auto'|'manual'|'demo', product, productName, loginUrl, loginEmail, tempPassword?, accessToken,
+//           manualDeadline?, supportWhatsappUrl, notes }
+//   → 200 { ok, alreadyDone: true, ... }  este pagamento já foi ativado (por qualquer instância, token ou e-mail):
+//           devolve o resultado salvo (nunca a senha) e não provisiona de novo
+//   → 400 { error: 'validation', fields } | 400 invalid_json | 413 | 415 unsupported_media_type
+//   → 401 { error: 'invalid_token'|'expired_token' }
+//   → 402 { error: 'payment_not_active' }  pagamento estornado/contestado/cancelado (reconsultado no Mercado Pago)
+//   → 409 { error: 'in_progress' }         outra requisição está ativando este mesmo pagamento agora
+//   → 503 { error: 'payment_check_failed' } Mercado Pago fora do ar (não dá para confirmar o pagamento)
+// GET ?token=… → 200 dados públicos (para /acesso) | 401 | 402 payment_not_active (revogado)
 //
-// O provisionamento automático nunca derruba a venda: qualquer erro vira modo "manual" e a equipe é avisada.
-import { send, allow, body } from '../lib/http.js';
+// Regras:
+// - MODO DEMO (sem MP_ACCESS_TOKEN): NUNCA chama os provisionadores reais, mesmo com credenciais configuradas.
+//   Responde mode "demo" com o loginUrl do produto e a nota "Demonstração: nenhuma conta foi criada".
+// - PRODUÇÃO: reconsulta o pagamento no MP e só ativa se status === 'approved' sem estorno; trava por paymentId no
+//   armazenamento durável (lib/store.js, chave aqta:onboarding:<paymentId>): o 1º grava "em andamento" e depois o
+//   resultado (sem senha). Sem armazenamento durável configurado, o provisionamento automático fica DESLIGADO
+//   (tudo vira manual): sem trava entre instâncias, um mesmo pagamento poderia criar várias contas.
+// - O provisionamento automático nunca derruba a venda: qualquer erro vira modo "manual" e a equipe é avisada.
+import { send, allow, readJson, isDemo } from '../lib/http.js';
 import { getPlan } from '../lib/catalog.js';
 import { signToken, verifyToken } from '../lib/token.js';
 import { notifyTeam } from '../lib/notify.js';
 import { provision as provisionObtra, obtraLoginUrl } from '../lib/provision/obtra.js';
-import { provision as provisionEmptra, emptraLoginUrl } from '../lib/provision/emptra.js';
+import { provision as provisionEmptra, emptraLoginUrl, normalizeCategories } from '../lib/provision/emptra.js';
+import { setIfAbsent, get as storeGet, set as storeSet, del as storeDel, storeMode, hasDurableStore, KEYS } from '../lib/store.js';
+import { resolvePayment, isPaymentActive } from './payment-status.js';
+import { isValidEmail } from './checkout.js';
 
 const PROVISIONERS = { obtra: provisionObtra, emptra: provisionEmptra };
 const LOGIN_URLS = { obtra: obtraLoginUrl, emptra: emptraLoginUrl };
 const ONBOARDED_TTL = 30 * 86400; // a página /acesso continua abrindo por 30 dias
 const MANUAL_DEADLINE = 'até 1 dia útil';
 const MAX_BODY_CHARS = 8192;
+const LOCK_TTL = 10 * 60;          // "em andamento" expira sozinho se a função morrer no meio
+const RESULT_TTL = 400 * 86400;    // resultado guardado por ~13 meses
+const DEMO_NOTE = 'Demonstração: nenhuma conta foi criada.';
 const UFS = new Set('AC AL AP AM BA CE DF ES GO MA MT MS MG PA PB PR PE PI RJ RN RS RO RR SC SP SE TO'.split(' '));
 
-// Idempotência "quente" (mesma instância): evita provisionar duas vezes com o mesmo pagamento
-// (duplo clique, recarga). Guarda só dados públicos — nunca a senha.
+// Idempotência "quente" (mesma instância): duplo clique / recarga. A garantia entre instâncias vem do
+// armazenamento durável (aqta:onboarding:<paymentId>). Guarda só dados públicos — nunca a senha.
 const done = new Map();      // paymentId → { publicResult, accessToken }
 const inflight = new Map();  // paymentId → Promise
 
@@ -31,13 +50,6 @@ const inflight = new Map();  // paymentId → Promise
 const onlyDigits = (v) => String(v ?? '').replace(/\D+/g, '');
 const cleanText = (v, max = 200) =>
   String(v ?? '').replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, max);
-
-function isValidEmail(v) {
-  const s = String(v ?? '');
-  if (s.length < 6 || s.length > 254) return false;
-  return /^[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)*\.[a-z]{2,}$/i.test(s)
-    && !s.includes('..');
-}
 
 function isValidCpf(v) {
   const d = onlyDigits(v);
@@ -122,8 +134,10 @@ export function validateOnboarding(input, product) {
     const profile = cleanText(rawExtra[profKey], 20).toLowerCase();
     if (profile !== 'comprador' && profile !== 'fornecedor') fields[`extra.${profKey}`] = 'Escolha um perfil: comprador ou fornecedor.';
     else extra.profile = profile;
-    if (Array.isArray(rawExtra.categories)) {
-      extra.categories = rawExtra.categories.slice(0, 30).map((c) => cleanText(c, 60)).filter(Boolean);
+    if (Array.isArray(rawExtra.categories) && extra.profile === 'fornecedor') {
+      // Só categorias do catálogo do Emptra (slug ou nome); grava o nome oficial, que é o que o Emptra pesquisa.
+      const cats = normalizeCategories(rawExtra.categories.slice(0, 40).map((c) => cleanText(c, 80)));
+      if (cats.length) extra.categories = cats;
     }
   }
   return { ok: Object.keys(fields).length === 0, data, extra, fields };

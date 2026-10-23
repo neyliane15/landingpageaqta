@@ -608,7 +608,7 @@ html { scroll-behavior: smooth; scroll-padding-top: calc(var(--lp-header-h, 64px
 .lp-final__ctas { justify-content: center; margin-top: 28px; }
 
 .lp-footer { border-top: 1px solid var(--lp-line); padding: 56px 0 28px; background: linear-gradient(transparent, rgba(1, 191, 253, .025)); }
-.lp-footer__inner { display: grid; grid-template-columns: 1.6fr 1fr 1fr; gap: 32px; }
+.lp-footer__inner { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; gap: 32px; }
 .lp-footer__brand img { height: 30px; width: auto; display: block; }
 .lp-footer__brand p { margin: 14px 0 0; font-size: 12.5px; color: var(--lp-muted); max-width: 32ch; }
 .lp-footer__nav { display: flex; flex-direction: column; gap: 10px; }
@@ -721,3 +721,11 @@ html { scroll-behavior: smooth; scroll-padding-top: calc(var(--lp-header-h, 64px
 
 /* links de navegação não sublinham (aqta.css sublinha a:hover) */
 .lp-nav__link:hover, .lp-footer__nav a:hover, .lp-hero__custom:hover, .lp-header__logo:hover, .lp-skip:hover { text-decoration: none; }
+
+/* WhatsApp da Aqta (aparece só quando o servidor informa o número: /api/catalog → support) */
+.lp-custom__wa { margin: 24px 0 0; }
+.lp-custom__wa .btn { gap: 8px; }
+.lp-wa-ico { flex: none; vertical-align: -3px; }
+/* mensagem de status do lead: conteúdo em bloco, botão quebra linha dentro do alerta (BUG-4) */
+.lp-lead-status .alert > div { min-width: 0; overflow-wrap: anywhere; }
+.lp-lead-status .alert .btn { margin-top: 10px; max-width: 100%; white-space: normal; }

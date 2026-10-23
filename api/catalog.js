@@ -1,5 +1,8 @@
-// GET /api/catalog — produtos e preços públicos (fonte única: lib/catalog.js).
-import { send, allow, isDemo } from '../lib/http.js';
+// GET /api/catalog — produtos e preços públicos (fonte única: lib/catalog.js) e contato de suporte.
+// 200 { products, demo, support: { whatsapp: "<dígitos>", whatsappUrl: "https://wa.me/<dígitos>" } | null,
+//       emptraCategories: [{ slug, name }] }
+import { send, allow, isDemo, supportWhatsapp } from '../lib/http.js';
+import { EMPTRA_CATEGORIES } from '../lib/provision/emptra.js';
 import { PRODUCTS, formatBRL } from '../lib/catalog.js';
 
 export default async function handler(req, res) {
@@ -16,5 +19,12 @@ export default async function handler(req, res) {
       interval: pl.interval,
     })),
   }));
-  send(res, 200, { products, demo: isDemo() });
+  const n = supportWhatsapp();
+  const support = n ? { whatsapp: n, whatsappUrl: `https://wa.me/${n}` } : null;
+  send(res, 200, {
+    products,
+    demo: isDemo(),
+    support,
+    emptraCategories: EMPTRA_CATEGORIES.map(([slug, name]) => ({ slug, name })),
+  });
 }

@@ -1,0 +1,21 @@
+/* Modal de compra (#checkout-modal, criado por assets/js/checkout.js). Fora do JS para a CSP não precisar de 'unsafe-inline'. */
+#checkout-modal .co-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px}
+#checkout-modal .co-title{margin:4px 0 0;font-size:16px;line-height:1.3}
+#checkout-modal .co-summary{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:12px 14px;margin:0 0 12px}
+#checkout-modal .co-summary__name{font-size:14px;font-weight:600}
+#checkout-modal .co-summary__tag{font-size:12px;color:var(--muted)}
+#checkout-modal .co-summary__price{font-size:18px;font-weight:700;white-space:nowrap}
+#checkout-modal .co-summary__price small{font-size:12px;font-weight:400;color:var(--muted)}
+#checkout-modal .co-secure{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);margin:0 0 12px}
+#checkout-modal .co-secure svg{flex:none;color:var(--cyan)}
+#checkout-modal .co-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px}
+#checkout-modal .co-grid .co-full{grid-column:1/-1}
+#checkout-modal .co-hint{font-weight:400;color:var(--muted);text-transform:none;letter-spacing:0}
+#checkout-modal .co-terms{display:flex;gap:8px;align-items:flex-start;font-size:12px;color:var(--muted);margin:12px 0 4px;line-height:1.5}
+#checkout-modal .co-terms input{margin-top:2px;accent-color:var(--cyan);flex:none}
+#checkout-modal .co-foot{font-size:12px;color:var(--muted);text-align:center;margin:10px 0 0}
+#checkout-modal .co-actions{margin-top:12px}
+#checkout-modal .co-alert{margin:0 0 12px;font-size:13px}
+#checkout-modal [hidden]{display:none!important}
+@media (max-width:520px){#checkout-modal .co-grid{grid-template-columns:1fr}}
+#checkout-modal .co-terms a{color:var(--cyan);text-decoration:underline}

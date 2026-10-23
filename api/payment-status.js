@@ -2,12 +2,15 @@
 // A verdade vem do Mercado Pago (produção) ou de um token demo assinado — nunca dos parâmetros da URL de retorno.
 // external_reference (contém um uuid) é exigido e precisa bater com o do pagamento: impede que alguém enumere
 // ids numéricos do Mercado Pago para obter dados do cliente ou o accessToken.
+// Com armazenamento (lib/store.js): pagamento revogado ⇒ `revoked: true` sem accessToken; já ativado ⇒
+// `onboarded: true` + o accessToken "onboarded" salvo (leva ao /acesso).
 // Erros: 400 missing_payment_id | 400 missing_reference | 404 not_found/invalid_payment | 502 Mercado Pago.
 import crypto from 'node:crypto';
 import { send, allow, isDemo } from '../lib/http.js';
 import { getPlan, formatBRL } from '../lib/catalog.js';
 import { signToken, verifyToken } from '../lib/token.js';
 import { getPayment } from '../lib/mercadopago.js';
+import { get as storeGet, KEYS } from '../lib/store.js';
 
 const REF_RE = /^aqta:([a-z0-9-]{1,40}):([a-z0-9-]{1,40}):[A-Za-z0-9-]{8,64}$/;
 const ACCESS_TTL = 7 * 86400;
@@ -50,6 +53,17 @@ function demoPaymentId(token) {
  *               externalReference, customer:{name,email,whatsapp,document,company}, demo, paymentMethod }
  * Erros: code 404 (inexistente / não-Aqta / valor ou moeda inválidos) ou 502 (falha do Mercado Pago).
  */
+
+/** Pagamento que dá direito a acesso agora: aprovado e sem nenhum valor estornado. */
+export const isPaymentActive = (p) => p?.status === 'approved' && !(p.refundedCents > 0);
+
+/** Lê do armazenamento (se houver) a revogação e o onboarding já feito. Nunca lança. */
+export async function paymentRecord(paymentId) {
+  const out = { revoked: null, onboarding: null };
+  try { out.revoked = await storeGet(KEYS.revoked(paymentId)); } catch (err) { console.error('[payment-status] store:', err?.message); }
+  try { out.onboarding = await storeGet(KEYS.onboarding(paymentId)); } catch (err) { console.error('[payment-status] store:', err?.message); }
+  return out;
+}
 export async function resolvePayment(rawId) {
   const id = str(rawId, 9000);
 
@@ -83,6 +97,8 @@ export async function resolvePayment(rawId) {
         },
         demo: true,
         paymentMethod: 'demo',
+        dateApproved: null,
+        refundedCents: 0,
       },
     };
   }
@@ -128,6 +144,8 @@ export async function resolvePayment(rawId) {
       customer: customerFromPayment(p),
       demo: false,
       paymentMethod: str(p.payment_type_id || p.payment_method_id, 40),
+      dateApproved: p.date_approved ? str(p.date_approved, 40) : null,
+      refundedCents: Math.max(0, Math.round(Number(p.transaction_amount_refunded) * 100) || 0),
     },
   };
 }
@@ -165,6 +183,24 @@ export default async function handler(req, res) {
     demo: p.demo,
     customer: { name, email, company, whatsapp, documentMasked: maskDocument(document) },
   };
+
+  // Revogação (estorno/chargeback/cancelamento registrado pelo webhook) e onboarding já concluído (qualquer instância).
+  const rec = await paymentRecord(p.paymentId);
+  if (rec.revoked) {
+    out.revoked = true;
+    return send(res, 200, out);
+  }
+  if (p.status === 'approved' && p.refundedCents > 0) {
+    out.revoked = true; // estorno parcial/total ainda com status approved: não emite acesso
+    return send(res, 200, out);
+  }
+  if (p.status === 'approved' && rec.onboarding?.state === 'done' && rec.onboarding.accessToken) {
+    // Já ativado: devolve o token "onboarded" salvo (o POST /api/onboarding com ele responde alreadyDone) em vez
+    // de um token de ativação novo — o link de retorno deixa de ser uma credencial para criar outra conta.
+    out.onboarded = true;
+    out.accessToken = rec.onboarding.accessToken;
+    return send(res, 200, out);
+  }
 
   if (p.status === 'approved') {
     try {

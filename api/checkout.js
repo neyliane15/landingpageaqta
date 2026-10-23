@@ -4,7 +4,7 @@
 // Também exporta os validadores para reuso (ex.: api/onboarding.js, api/lead.js):
 //   import { validateCustomer, isValidCpfCnpj, isValidEmail, ... } from './checkout.js';
 import { randomUUID } from 'node:crypto';
-import { send, allow, body, baseUrl, isDemo } from '../lib/http.js';
+import { send, allow, readJson, baseUrl, isDemo } from '../lib/http.js';
 import { getPlan } from '../lib/catalog.js';
 import { createPreference } from '../lib/mercadopago.js';
 
@@ -20,11 +20,18 @@ export const normalizeEmail = (v) => String(v ?? '').trim().toLowerCase();
 
 // ---------------------------------------------------------------- validadores
 
+// Parte local: a mesma regra de z.string().email() do Zod 3.23, usada pela API do Emptra (POST /companies e
+// POST /admin/users respondem 422 a qualquer e-mail fora dela). Não começa com ".", sem "..", só [A-Z0-9_'+-.]
+// e termina em [A-Z0-9_+-]. Domínio: rótulos DNS válidos com TLD de 2+ letras (mais estrito que o Zod).
+const ZOD_EMAIL_RE = /^(?!\.)(?!.*\.\.)([A-Z0-9_'+\-.]*)[A-Z0-9_+-]@([A-Z0-9][A-Z0-9-]*\.)+[A-Z]{2,}$/i;
+const DOMAIN_RE = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)*\.[a-z]{2,}$/i;
+
 export function isValidEmail(v) {
   const s = String(v ?? '');
   if (s.length < 6 || s.length > LIMITS.email) return false;
-  return /^[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)*\.[a-z]{2,}$/i.test(s)
-    && !s.includes('..');
+  const at = s.lastIndexOf('@');
+  if (at < 1 || at > 64) return false;
+  return ZOD_EMAIL_RE.test(s) && DOMAIN_RE.test(s.slice(at + 1));
 }
 
 export function isValidCpf(v) {
@@ -161,14 +168,8 @@ export function buildPreference({ product, plan, customer, ref, base }) {
 export default async function handler(req, res) {
   if (!allow(req, res, ['POST'])) return;
 
-  if (typeof req.body === 'string' && req.body.length > MAX_BODY_CHARS) {
-    return send(res, 413, { error: 'payload_too_large' });
-  }
-  const data = body(req);
-  if (!data || typeof data !== 'object' || Array.isArray(data)) return send(res, 400, { error: 'invalid_json' });
-  let size = 0;
-  try { size = JSON.stringify(data).length; } catch { size = Infinity; }
-  if (size > MAX_BODY_CHARS) return send(res, 413, { error: 'payload_too_large' });
+  const data = readJson(req, res, { maxChars: MAX_BODY_CHARS }); // 415 / 413 / 400 invalid_json
+  if (!data) return;
 
   const productId = typeof data.product === 'string' ? data.product.trim().toLowerCase() : '';
   const planId = typeof data.plan === 'string' && data.plan.trim() ? data.plan.trim().toLowerCase() : 'basico';

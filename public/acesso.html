@@ -13,42 +13,14 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Michroma&display=swap">
   <link rel="stylesheet" href="/assets/css/aqta.css">
-  <style>
-    /* Estilos exclusivos da página /acesso (prefixo ac-). Componentes vêm de aqta.css. */
-    #ac-root { grid-template-columns: minmax(0, 1fr); }
-    .ac-wrap { width: 100%; max-width: 760px; min-width: 0; display: grid; gap: 20px; justify-self: center; }
-    .ac-progress { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-    .ac-progress li { position: relative; padding-top: 12px; font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: var(--text); }
-    .ac-progress li::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 2px; border-radius: 2px;
-      background: linear-gradient(90deg, var(--cyan-deep), var(--cyan)); }
-    .ac-progress span { font-family: var(--font-display); font-size: 10px; margin-right: 6px; color: var(--cyan); }
-    .ac-progress li[data-s="wait"]::before { background: linear-gradient(90deg, var(--warn) 0 50%, var(--line) 50%); }
-    .ac-progress li[data-s="wait"] span { color: var(--warn); }
-    #ac-view { display: grid; gap: 20px; grid-template-columns: minmax(0, 1fr); }
-    #ac-view .page-shell__card { max-width: none; }
-    .ac-head { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
-    .ac-title:focus { outline: none; }
-    .ac-h2 { font-family: var(--font-display); font-weight: 400; font-size: 14px; letter-spacing: .04em; margin: 0; }
-    .ac-summary dd { word-break: break-word; }
-    .ac-summary .input-group { max-width: 340px; margin-left: auto; }
-    .ac-note { font-size: 12px; color: var(--muted); line-height: 1.6; margin: 0; }
-    .ac-note a, .page-shell__lead a { color: var(--cyan); }
-    .steps code { font-family: var(--font-mono, monospace); font-size: 12px; color: var(--cyan-glow); }
-    .ac-center { display: grid; justify-items: center; gap: 12px; padding: 24px 0; text-align: center; }
-    @media (max-width: 560px) {
-      .ac-summary > div { flex-direction: column; gap: 4px; }
-      .ac-summary dd { text-align: left; }
-      .ac-summary .input-group { max-width: none; margin-left: 0; }
-      .ac-progress li { font-size: 9px; letter-spacing: .12em; }
-    }
-  </style>
+  <link rel="stylesheet" href="/assets/css/acesso.css">
 </head>
-<body class="page-shell" data-support-whatsapp="5521999999999">
-  <a class="sr-only" href="#ac-root">Pular para o conteúdo</a>
+<body class="page-shell">
+  <a class="skip-link" href="#ac-root">Pular para o conteúdo</a>
   <header class="page-shell__header">
     <div class="container page-shell__bar">
       <a class="logo" href="/" aria-label="Aqta — página inicial"><img src="/assets/img/logo-aqta.svg" alt="Aqta" width="120" height="30"></a>
-      <nav class="page-shell__nav" aria-label="Ajuda"><a id="ac-help" href="https://wa.me/5521999999999" target="_blank" rel="noopener">Suporte</a></nav>
+      <nav class="page-shell__nav" aria-label="Ajuda"><a id="ac-help" href="/#sob-medida" data-wa-text="Olá! Preciso de ajuda com o meu acesso a um sistema Aqta.">Suporte</a></nav>
     </div>
   </header>
 
@@ -75,7 +47,14 @@
   </main>
 
   <footer class="page-shell__footer">
-    <div class="container"><span>Aqta · Desenvolvimento de software</span><a href="/">Voltar ao site</a></div>
+    <div class="container">
+      <span>Aqta · Desenvolvimento de software</span>
+      <nav class="page-shell__legal" aria-label="Informações legais">
+        <a href="/termos">Termos de Uso</a>
+        <a href="/privacidade">Privacidade</a>
+        <a href="/">Voltar ao site</a>
+      </nav>
+    </div>
   </footer>
 
   <script type="module" src="/assets/js/acesso.js"></script>

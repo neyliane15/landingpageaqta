@@ -1,15 +1,46 @@
 // POST /api/webhook — notificações do Mercado Pago (Webhooks / IPN).
 // Docs: https://www.mercadopago.com.br/developers/pt/docs/your-integrations/notifications/webhooks
-// - Valida x-signature (ts=...,v1=...) com MP_WEBHOOK_SECRET quando o segredo existe.
-// - type/topic "payment": consulta o pagamento no MP (nunca confia no corpo) e, se aprovado, avisa a equipe.
+// - Valida x-signature (ts=...,v1=...) com MP_WEBHOOK_SECRET quando o segredo existe. Assinatura presente e
+//   inválida ⇒ 401. Notificação IPN (?topic=payment&id=…) SEM x-signature é aceita mesmo com o segredo: o MP não
+//   assina IPN, e a notificação é só um gatilho — o pagamento é sempre reconsultado na API com o nosso token.
+// - Idade do `ts`: NÃO rejeitamos por idade. A doc do MP não garante que as re-tentativas (que podem vir horas
+//   depois) tragam um ts novo; rejeitar faria o MP re-tentar para sempre. Replay não tem efeito: a verdade vem da
+//   consulta ao MP e os avisos são deduplicados. Só registramos um aviso no log quando ts tem mais de 10 min.
+// - type/topic "payment": consulta o pagamento no MP (nunca confia no corpo) e
+//     approved                                  ⇒ notifyTeam payment.approved
+//     refunded | charged_back | cancelled*      ⇒ notifyTeam payment.revoked (ação: revogar acesso) e grava
+//                                                  aqta:revoked:<id> no armazenamento (bloqueia ativação/acesso)
+//     in_mediation                              ⇒ notifyTeam payment.in_mediation (acompanhar a disputa)
+//   (*cancelled só conta como revogação se o pagamento já tinha sido aprovado — date_approved — ou ativado;
+//    um PIX/boleto que expira sem pagar também vira "cancelled" e não é revogação.)
 // - Respostas não-2xx fazem o MP re-tentar: 500 só para falhas transitórias de consulta.
 import crypto from 'node:crypto';
 import { send, allow, isDemo } from '../lib/http.js';
 import { resolvePayment } from './payment-status.js';
+import { setIfAbsent, get as storeGet, set as storeSet, storeMode, KEYS } from '../lib/store.js';
 
-// Evita avisar a equipe duas vezes pelo mesmo pagamento na mesma instância (payment.created + payment.updated,
-// re-tentativas). Melhor esforço: sem banco, outra instância serverless pode repetir o aviso.
+const MAX_TS_AGE_S = 600;
+const REVOKED_STATUSES = new Set(['refunded', 'charged_back', 'cancelled']);
+const REVOKED_TTL = 400 * 86400;
+
+// Evita avisar a equipe duas vezes pelo mesmo evento (payment.created + payment.updated, re-tentativas).
+// Com armazenamento, a deduplicação vale entre instâncias; sem ele, só na mesma instância.
 const notified = new Set();
+
+/** true se este (evento, pagamento) ainda não foi avisado. Falha do armazenamento ⇒ avisa (melhor repetir que perder). */
+async function firstTime(event, paymentId) {
+  const k = `${event}:${paymentId}`;
+  if (notified.has(k)) return false;
+  notified.add(k);
+  if (notified.size > 5000) notified.delete(notified.values().next().value);
+  if (storeMode() === 'none') return true;
+  try {
+    return await setIfAbsent(KEYS.notified(event, paymentId), { at: new Date().toISOString() }, 90 * 86400);
+  } catch (err) {
+    console.error('[webhook] store indisponível na deduplicação:', err?.message);
+    return true;
+  }
+}
 
 async function notify(event) {
   try {
@@ -76,18 +107,28 @@ export default async function handler(req, res) {
 
   if (isDemo()) return send(res, 200, { ok: true, ignored: 'demo_mode' });
 
+  const q = req.query || {};
+  let b = {};
+  try { b = req.body && typeof req.body === 'object' ? req.body : {}; } catch { b = {}; } // Vercel lança com JSON inválido
+  req = { ...req, query: q, body: b, headers: req.headers || {} };
+
   const secret = process.env.MP_WEBHOOK_SECRET;
-  if (secret) {
+  const sigHeader = header(req, 'x-signature');
+  const unsignedIpn = !sigHeader && q.topic !== undefined && q.id !== undefined;
+  if (secret && !unsignedIpn) {
     if (!verifySignature(req, secret)) {
       console.warn('[webhook] assinatura inválida', { requestId: header(req, 'x-request-id') });
       return send(res, 401, { error: 'invalid_signature' });
     }
-  } else {
+    const ts = Number(/(?:^|,)\s*ts=(\d+)/.exec(String(sigHeader))?.[1]);
+    const ageS = Math.floor(Date.now() / 1000) - (ts > 1e11 ? Math.floor(ts / 1000) : ts);
+    if (Number.isFinite(ageS) && Math.abs(ageS) > MAX_TS_AGE_S) {
+      console.warn('[webhook] ts da assinatura com mais de 10 min (aceito; o pagamento é reconsultado no MP)', { ageS });
+    }
+  } else if (!secret) {
     console.warn('[webhook] MP_WEBHOOK_SECRET não configurado: assinatura não verificada');
   }
 
-  const q = req.query || {};
-  const b = req.body && typeof req.body === 'object' ? req.body : {};
   const type = String(b.type ?? q.type ?? b.topic ?? q.topic ?? '').trim();
   if (type !== 'payment') return send(res, 200, { ok: true, ignored: type || 'unknown_type' });
 
@@ -102,24 +143,58 @@ export default async function handler(req, res) {
   }
 
   const p = r.payment;
-  if (p.status === 'approved' && !notified.has(p.paymentId)) {
-    notified.add(p.paymentId);
-    if (notified.size > 5000) notified.delete(notified.values().next().value);
-    await notify({
-      event: 'payment.approved',
-      paymentId: p.paymentId,
-      externalReference: p.externalReference,
-      product: p.product,
-      plan: p.plan,
-      productName: p.productName,
-      planName: p.planName,
-      amount: p.amount,
-      amountCents: p.amountCents,
-      paymentMethod: p.paymentMethod,
-      customer: p.customer,
-      action: String(b.action ?? ''),
-      at: new Date().toISOString(),
-    });
+  const base = {
+    paymentId: p.paymentId,
+    externalReference: p.externalReference,
+    product: p.product,
+    plan: p.plan,
+    productName: p.productName,
+    planName: p.planName,
+    amount: p.amount,
+    amountCents: p.amountCents,
+    paymentMethod: p.paymentMethod,
+    customer: p.customer,
+    action: String(b.action ?? ''),
+    at: new Date().toISOString(),
+  };
+
+  if (p.status === 'approved' && !(p.refundedCents > 0)) {
+    if (await firstTime('payment.approved', p.paymentId)) await notify({ event: 'payment.approved', ...base });
+    return send(res, 200, { ok: true, status: p.status });
+  }
+
+  let revoke = REVOKED_STATUSES.has(p.status) || (p.status === 'approved' && p.refundedCents > 0);
+  let onboarding = null;
+  if (revoke && p.status === 'cancelled' && !p.dateApproved) {
+    try { onboarding = await storeGet(KEYS.onboarding(p.paymentId)); } catch { /* sem store */ }
+    revoke = Boolean(onboarding); // PIX/boleto expirado sem pagar: não é revogação
+  }
+
+  if (revoke) {
+    if (storeMode() !== 'none') {
+      try {
+        await storeSet(KEYS.revoked(p.paymentId), { status: p.status, statusDetail: p.statusDetail, at: base.at }, REVOKED_TTL);
+      } catch (err) {
+        console.error('[webhook] não foi possível gravar a revogação:', err?.message);
+        return send(res, 500, { error: 'store_unavailable' }); // MP re-tenta; a revogação não pode se perder
+      }
+    }
+    if (await firstTime('payment.revoked', p.paymentId)) {
+      await notify({
+        event: 'payment.revoked',
+        ...base,
+        status: p.status,
+        statusDetail: p.statusDetail,
+        refundedCents: p.refundedCents,
+        action: 'REVOGAR/SUSPENDER O ACESSO deste cliente no produto',
+        mpAction: base.action,
+      });
+    }
+    return send(res, 200, { ok: true, status: p.status, revoked: true });
+  }
+
+  if (p.status === 'in_mediation' && await firstTime('payment.in_mediation', p.paymentId)) {
+    await notify({ event: 'payment.in_mediation', ...base, status: p.status, statusDetail: p.statusDetail });
   }
   return send(res, 200, { ok: true, status: p.status });
 }

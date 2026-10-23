@@ -7,13 +7,14 @@
   <meta name="description" content="Aqta Desenvolvimento de Software: Obtra, o Diário de Obra (RDO) digital para construtoras, e Emptra, cotação de materiais via WhatsApp para arquitetos, engenheiros e fornecedores. Assine online ou peça um sistema sob medida.">
   <meta name="theme-color" content="#05070b">
   <meta name="color-scheme" content="dark">
+  <!-- PREENCHER: domínio final para og:image/canonical absolutos -->
   <link rel="canonical" href="/">
 
   <meta property="og:type" content="website">
   <meta property="og:locale" content="pt_BR">
   <meta property="og:site_name" content="Aqta Desenvolvimento de Software">
   <meta property="og:title" content="Aqta — Software sob medida para a construção civil">
-  <meta property="og:description" content="Obtra: Diário de Obra digital a partir de R$ 200/mês. Emptra: cotação de materiais via WhatsApp por R$ 300/mês. Pague com PIX, cartão ou boleto e comece no mesmo dia.">
+  <meta property="og:description" content="Obtra: Diário de Obra digital a partir de R$ 200/mês. Emptra: cotação de materiais via WhatsApp por R$ 300/mês. Plano mensal pré-pago por PIX, cartão ou boleto, sem fidelidade. Ativação imediata após o pagamento aprovado.">
   <meta property="og:image" content="/assets/img/og-image.png">
   <meta property="og:image:alt" content="Aqta — Obtra e Emptra">
   <meta name="twitter:card" content="summary_large_image">
@@ -27,6 +28,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Michroma&display=swap">
   <link rel="stylesheet" href="/assets/css/aqta.css">
   <link rel="stylesheet" href="/assets/css/landing.css">
+  <link rel="stylesheet" href="/assets/css/checkout.css">
 
   <script type="application/ld+json">
   {
@@ -90,8 +92,8 @@
           </h1>
           <p class="lp-hero__lead">
             Do canteiro à compra de materiais: o <strong>Obtra</strong> digitaliza o Diário de Obra da sua construtora e
-            o <strong>Emptra</strong> cota materiais com seus fornecedores direto pelo WhatsApp. Assine online,
-            pague com PIX, cartão ou boleto e comece a usar no mesmo dia.
+            o <strong>Emptra</strong> cota materiais com seus fornecedores direto pelo WhatsApp. Plano mensal pré-pago:
+            pague cada mês com PIX, cartão ou boleto, sem fidelidade — e o acesso é ativado logo após o pagamento aprovado.
           </p>
           <div class="lp-hero__ctas">
             <a class="btn btn--primary" href="#obtra">Conhecer o Obtra</a>
@@ -102,7 +104,7 @@
           <dl class="lp-hero__facts">
             <div><dt>Obtra</dt><dd><span data-price="obtra">R$ 200</span><small>/mês</small></dd></div>
             <div><dt>Emptra</dt><dd><span data-price="emptra">R$ 300</span><small>/mês</small></dd></div>
-            <div><dt>Ativação</dt><dd>No mesmo dia</dd></div>
+            <div><dt>Ativação</dt><dd>Após o pagamento</dd></div>
           </dl>
         </div>
 
@@ -150,8 +152,8 @@
             <span>apps para instalar: fornecedor cota pelo WhatsApp, cliente acompanha pelo navegador</span>
           </li>
           <li class="lp-band__item reveal">
-            <strong>1 dia</strong>
-            <span>do pagamento ao primeiro uso: PIX, cartão ou boleto pelo Mercado Pago</span>
+            <strong>1 dia útil</strong>
+            <span>no máximo, do pagamento aprovado ao acesso — na ativação automática, é na hora</span>
           </li>
         </ul>
       </div>
@@ -359,7 +361,7 @@
       <div class="container">
         <header class="lp-section__head lp-section__head--center reveal">
           <p class="eyebrow">Como funciona</p>
-          <h2 class="lp-title" id="como-titulo">Da escolha do plano ao primeiro uso, no mesmo dia</h2>
+          <h2 class="lp-title" id="como-titulo">Da escolha do plano ao primeiro uso, sem burocracia</h2>
         </header>
         <ol class="lp-steps">
           <li class="lp-step reveal">
@@ -375,12 +377,12 @@
           <li class="lp-step reveal">
             <span class="lp-step__n">03</span>
             <h3>Ative sua conta</h3>
-            <p>Informe os dados da empresa e o e-mail de login. Você recebe o acesso com senha temporária.</p>
+            <p>Informe os dados da empresa e o e-mail de login. A ativação é imediata após o pagamento aprovado (ou em até 1 dia útil quando a liberação for manual).</p>
           </li>
           <li class="lp-step reveal">
             <span class="lp-step__n">04</span>
             <h3>Comece a usar</h3>
-            <p>Entre no sistema, cadastre sua equipe e lance a primeira obra ou cotação hoje mesmo.</p>
+            <p>Entre no sistema, cadastre sua equipe e lance a primeira obra ou cotação.</p>
           </li>
         </ol>
         <p class="lp-pay reveal" aria-label="Formas de pagamento">
@@ -396,7 +398,7 @@
         <header class="lp-section__head lp-section__head--center reveal">
           <p class="eyebrow">Planos</p>
           <h2 class="lp-title" id="planos-titulo">Preço simples, por mês, sem surpresa</h2>
-          <p class="lp-lead">Assine online e receba o acesso no mesmo dia. Precisa de algo além? A Aqta desenvolve o seu sistema.</p>
+          <p class="lp-lead">Plano mensal pré-pago — você paga cada mês por PIX, cartão ou boleto; sem fidelidade, sem multa. Precisa de algo além? A Aqta desenvolve o seu sistema.</p>
         </header>
 
         <div class="lp-plans">
@@ -470,6 +472,9 @@
             <li>Proposta com escopo, prazo e custo de implantação</li>
             <li>Atendimento direto pelo WhatsApp</li>
           </ul>
+          <p class="lp-custom__wa" data-wa-only hidden>
+            <a class="btn btn--ghost" href="/#sob-medida" data-wa-text="Olá! Vim pelo site da Aqta e quero conversar sobre um sistema personalizado."><svg class="lp-wa-ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M20 12a8 8 0 0 1-11.8 7L4 20l1.1-4A8 8 0 1 1 20 12z"/><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5l1-1.4-1.8-.9-.8.8a4 4 0 0 1-2.4-2.4l.8-.8-.9-1.8z"/></svg> Conversar no WhatsApp</a>
+          </p>
         </div>
 
         <div class="frame lp-custom__form reveal">
@@ -507,7 +512,7 @@
             </div>
             <div id="lead-status" class="lp-lead-status" role="status" aria-live="polite"></div>
             <button class="btn btn--primary btn--block" type="submit">Enviar pedido de orçamento</button>
-            <p class="lp-form-note">Respondemos em até 1 dia útil. Seus dados são usados só para este contato.</p>
+            <p class="lp-form-note">Respondemos em até 1 dia útil. Seus dados são usados só para este contato — veja a <a href="/privacidade">Política de Privacidade</a>.</p>
           </form>
         </div>
       </div>
@@ -519,13 +524,13 @@
         <header class="lp-section__head reveal">
           <p class="eyebrow">Dúvidas frequentes</p>
           <h2 class="lp-title" id="faq-titulo">Perguntas e respostas</h2>
-          <p class="lp-lead">Não achou o que procurava? <a href="#sob-medida">Fale com a Aqta</a>.</p>
+          <p class="lp-lead">Não achou o que procurava? <a href="#sob-medida">Fale com a Aqta</a><span data-wa-only hidden> ou <a href="/#sob-medida" data-wa-text="Olá! Tenho uma dúvida sobre o Obtra/Emptra.">chame no WhatsApp</a></span>.</p>
         </header>
         <div class="lp-faq" data-faq>
           <div class="lp-faq__item">
             <h3><button class="lp-faq__q" type="button" aria-expanded="false" aria-controls="faq-1" id="faq-1-q">Como funciona o pagamento?</button></h3>
             <div class="lp-faq__a" id="faq-1" role="region" aria-labelledby="faq-1-q" hidden>
-              <p>O pagamento é feito pelo Mercado Pago, com PIX, cartão de crédito ou boleto. Assim que ele é confirmado, você preenche os dados da empresa e recebe o acesso ao sistema. PIX e cartão costumam confirmar na hora; o boleto pode levar até 3 dias úteis.</p>
+              <p>O plano é mensal e pré-pago: cada mês é pago à parte pelo Mercado Pago, com PIX, cartão de crédito ou boleto — não é débito automático. Assim que o pagamento é confirmado, você preenche os dados da empresa e o acesso é ativado. PIX e cartão costumam confirmar na hora; o boleto pode levar até 3 dias úteis. O Mercado Pago envia o comprovante para o seu e-mail.</p>
             </div>
           </div>
           <div class="lp-faq__item">
@@ -537,7 +542,7 @@
           <div class="lp-faq__item">
             <h3><button class="lp-faq__q" type="button" aria-expanded="false" aria-controls="faq-3" id="faq-3-q">Em quanto tempo recebo o acesso?</button></h3>
             <div class="lp-faq__a" id="faq-3" role="region" aria-labelledby="faq-3-q" hidden>
-              <p>Com o pagamento aprovado, a ativação é feita no mesmo fluxo: você informa a empresa e o e-mail de login e recebe as instruções de acesso. Quando a liberação precisa ser feita pela equipe Aqta, o prazo é de até 1 dia útil.</p>
+              <p>A ativação é imediata após o pagamento aprovado: você informa a empresa e o e-mail de login e recebe as instruções de acesso na mesma hora. Quando a liberação precisa ser feita manualmente pela equipe Aqta, o prazo é de até 1 dia útil.</p>
             </div>
           </div>
           <div class="lp-faq__item">
@@ -571,9 +576,15 @@
             </div>
           </div>
           <div class="lp-faq__item">
-            <h3><button class="lp-faq__q" type="button" aria-expanded="false" aria-controls="faq-9" id="faq-9-q">Como faço para cancelar ou mudar de plano?</button></h3>
+            <h3><button class="lp-faq__q" type="button" aria-expanded="false" aria-controls="faq-9" id="faq-9-q">Como funciona a renovação?</button></h3>
             <div class="lp-faq__a" id="faq-9" role="region" aria-labelledby="faq-9-q" hidden>
-              <p>A assinatura é mensal. Para cancelar, mudar de plano ou contratar o outro sistema, fale com o suporte da Aqta pelo WhatsApp.</p>
+              <p>Cada pagamento cobre 1 mês de uso. Não há cobrança automática: perto do vencimento, a equipe Aqta entra em contato para lembrar, e você renova pelo mesmo botão de assinatura do site (“Assinar o Obtra” ou “Assinar o Emptra”), pagando o mês seguinte por PIX, cartão ou boleto.</p>
+            </div>
+          </div>
+          <div class="lp-faq__item">
+            <h3><button class="lp-faq__q" type="button" aria-expanded="false" aria-controls="faq-10" id="faq-10-q">Como faço para cancelar ou mudar de plano?</button></h3>
+            <div class="lp-faq__a" id="faq-10" role="region" aria-labelledby="faq-10-q" hidden>
+              <p>Para cancelar, basta não renovar: não há fidelidade nem multa, e o acesso segue até o fim do mês já pago. Para mudar de plano ou contratar o outro sistema, <a href="#sob-medida">fale com a Aqta</a><span data-wa-only hidden> ou <a href="/#sob-medida" data-wa-text="Olá! Quero mudar de plano / contratar outro sistema da Aqta.">pelo WhatsApp</a></span>. Detalhes nos <a href="/termos">Termos de Uso e Contratação</a>.</p>
             </div>
           </div>
         </div>
@@ -585,7 +596,7 @@
       <div class="container">
         <div class="frame frame--glow lp-final__box reveal">
           <h2 class="lp-title" id="final-titulo">Pronto para tirar a obra do papel?</h2>
-          <p class="lp-lead">Assine hoje e comece a usar ainda hoje.</p>
+          <p class="lp-lead">Plano mensal pré-pago, sem fidelidade. A ativação é imediata após o pagamento aprovado.</p>
           <div class="lp-hero__ctas lp-final__ctas">
             <button class="btn btn--primary" type="button" data-checkout="obtra" data-plan="basico">Assinar o Obtra</button>
             <button class="btn btn--primary" type="button" data-checkout="emptra" data-plan="basico">Assinar o Emptra</button>
@@ -614,6 +625,12 @@
         <a href="#como-funciona">Como funciona</a>
         <a href="#planos">Planos</a>
         <a href="#faq">Dúvidas frequentes</a>
+        <a href="/#sob-medida" data-wa-text="Olá! Vim pelo site da Aqta." data-wa-only hidden>WhatsApp da Aqta</a>
+      </nav>
+      <nav class="lp-footer__nav" aria-label="Informações legais">
+        <p class="lp-footer__title">Legal</p>
+        <a href="/termos">Termos de Uso e Contratação</a>
+        <a href="/privacidade">Política de Privacidade</a>
       </nav>
     </div>
     <div class="container lp-footer__base">

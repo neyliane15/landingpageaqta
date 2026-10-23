@@ -3,8 +3,9 @@
 // A senha temporária NUNCA vem do servidor aqui: só existe em sessionStorage['aqta.tempPassword'],
 // gravada pela página /obrigado logo após o onboarding.
 
+import { loadSupport, applySupportLinks, waAttrs } from './support.js';
+
 const $view = document.getElementById('ac-view');
-const SUPPORT_WA = (document.body.dataset.supportWhatsapp || '').replace(/\D/g, '');
 const TOKEN_KEYS = ['aqta.access', 'aqta.accessToken'];
 
 const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({
@@ -18,11 +19,6 @@ function storage(key, value) {
     else sessionStorage.setItem(key, value);
   } catch { /* modo privado / bloqueado */ }
   return null;
-}
-
-function waLink(text) {
-  const base = SUPPORT_WA ? `https://wa.me/${SUPPORT_WA}` : 'https://wa.me/';
-  return `${base}?text=${encodeURIComponent(text)}`;
 }
 
 const safeUrl = (u) => (/^https?:\/\//i.test(String(u || '')) ? String(u) : '#');
@@ -52,6 +48,7 @@ function readTempPassword() {
 
 function render(html, { focus = true } = {}) {
   $view.innerHTML = html;
+  applySupportLinks($view);
   if (focus) {
     const t = $view.querySelector('.ac-title');
     if (t) { t.setAttribute('tabindex', '-1'); t.focus({ preventScroll: false }); }
@@ -129,7 +126,7 @@ function viewInvalid(kind) {
         ? 'Por segurança, o link de acesso tem validade. Seu pagamento e seu acesso continuam garantidos — fale com a gente que reenviamos os dados.'
         : 'O link pode estar incompleto. Abra o link exatamente como recebeu ou fale com o suporte — seu pagamento está garantido.'}</p>
       <div class="page-shell__actions">
-        <a class="btn btn--primary" href="${esc(waLink('Olá! Preciso de ajuda com o link de acesso ao meu sistema Aqta.'))}" target="_blank" rel="noopener">Falar com o suporte no WhatsApp</a>
+        <a class="btn btn--primary" ${waAttrs('Olá! Preciso de ajuda com o link de acesso ao meu sistema Aqta.')}>Falar com o suporte</a>
         <a class="btn btn--ghost" href="/">Voltar ao site</a>
       </div>
     </section>`);
@@ -142,7 +139,7 @@ function viewNetworkError(token) {
       <p class="page-shell__lead">Verifique sua internet e tente novamente.</p>
       <div class="page-shell__actions">
         <button class="btn btn--primary" type="button" id="ac-retry">Tentar novamente</button>
-        <a class="btn btn--ghost" href="${esc(waLink('Olá! Não consigo abrir a página de acesso do meu sistema Aqta.'))}" target="_blank" rel="noopener">Falar com o suporte</a>
+        <a class="btn btn--ghost" ${waAttrs('Olá! Não consigo abrir a página de acesso do meu sistema Aqta.')}>Falar com o suporte</a>
       </div>
     </section>`);
   document.getElementById('ac-retry').addEventListener('click', () => load(token));
@@ -150,13 +147,13 @@ function viewNetworkError(token) {
 
 function viewPending(d) {
   setProgressWait();
-  const support = safeUrl(d.supportWhatsappUrl) !== '#' ? d.supportWhatsappUrl : waLink(`Olá! Paguei o ${d.productName} e preciso concluir a ativação.`);
+  const support = `Olá! Paguei o ${d.productName} e preciso concluir a ativação.`;
   render(`
     <section class="frame page-shell__card">
       ${head('warn', 'Ativação pendente', `Falta concluir a ativação do ${esc(d.productName)}`)}
       <p class="page-shell__lead">Seu pagamento foi aprovado, mas ainda precisamos dos dados da empresa para criar o acesso. Volte à página do pagamento para concluir, ou fale com a gente.</p>
       <div class="page-shell__actions">
-        <a class="btn btn--primary" href="${esc(support)}" target="_blank" rel="noopener">Falar com o suporte no WhatsApp</a>
+        <a class="btn btn--primary" ${waAttrs(support)}>Falar com o suporte</a>
         <a class="btn btn--ghost" href="/">Voltar ao site</a>
       </div>
     </section>`);
@@ -167,18 +164,16 @@ const row = (dt, dd) => `<div><dt>${dt}</dt><dd>${dd}</dd></div>`;
 function viewReady(d) {
   const manual = d.mode === 'manual';
   const pwd = manual ? '' : readTempPassword();
-  const support = safeUrl(d.supportWhatsappUrl) !== '#'
-    ? d.supportWhatsappUrl
-    : waLink(manual
-      ? `Olá! Contratei o ${d.productName}${d.company ? ` para a empresa ${d.company}` : ''} e aguardo a liberação do acesso.`
-      : `Olá! Preciso de ajuda com o meu acesso ao ${d.productName}.`);
+  const support = manual
+    ? `Olá! Contratei o ${d.productName}${d.company ? ` para a empresa ${d.company}` : ''} e aguardo a liberação do acesso.`
+    : `Olá! Preciso de ajuda com o meu acesso ao ${d.productName}.`;
   const enter = `Entrar no ${esc(d.productName)}`;
   const forgot = d.product === 'obtra'
     ? 'Se não anotou a senha, use <em>Esqueci minha senha</em> na tela de login do Obtra com o e-mail acima.'
-    : `Se não anotou a senha, <a href="${esc(support)}" target="_blank" rel="noopener">fale com o suporte</a> que geramos uma nova.`;
+    : `Se não anotou a senha, <a ${waAttrs(support)}>fale com o suporte</a> que geramos uma nova.`;
   const changeWhere = d.product === 'obtra' ? 'no menu do seu usuário, em <em>Trocar senha</em>' : 'em <em>Perfil</em>, no Emptra';
   const help = document.getElementById('ac-help');
-  if (help) help.href = support;
+  if (help) { help.dataset.waText = support; applySupportLinks(help.parentElement); }
   if (manual) setProgressWait();
 
   const passwordRow = manual ? '' : pwd
@@ -196,7 +191,7 @@ function viewReady(d) {
         ? `Recebemos tudo. Seu ${esc(d.productName)} será liberado ${esc(d.manualDeadline || 'em até 1 dia útil')}`
         : `Seu acesso ao ${esc(d.productName)} está pronto`)}
       <p class="page-shell__lead">${manual
-        ? `A equipe Aqta está criando o ambiente da <strong>${esc(d.company)}</strong> e avisa você no WhatsApp e no e-mail <strong>${esc(d.loginEmail)}</strong> assim que estiver tudo pronto. Se preferir, chame a gente agora.`
+        ? `A equipe Aqta está criando o ambiente da <strong>${esc(d.company)}</strong> e entra em contato pelo WhatsApp ou pelo e-mail <strong>${esc(d.loginEmail)}</strong> assim que estiver tudo pronto. Se preferir, chame a gente agora.`
         : 'Use os dados abaixo para entrar. Guarde a senha temporária em local seguro — ela aparece só nesta sessão do navegador.'}</p>
 
       <dl class="summary ac-summary">
@@ -212,16 +207,47 @@ function viewReady(d) {
 
       <div class="page-shell__actions">
         ${manual
-          ? `<a class="btn btn--primary" href="${esc(support)}" target="_blank" rel="noopener">Falar com a Aqta no WhatsApp</a>
+          ? `<a class="btn btn--primary" ${waAttrs(support)}>Falar com a Aqta</a>
              <a class="btn btn--ghost" href="${esc(safeUrl(d.loginUrl))}">${enter}</a>`
           : `<a class="btn btn--primary" href="${esc(safeUrl(d.loginUrl))}">${enter}</a>
-             <a class="btn btn--ghost" href="${esc(support)}" target="_blank" rel="noopener">Precisa de ajuda?</a>`}
+             <a class="btn btn--ghost" ${waAttrs(support)}>Precisa de ajuda?</a>`}
       </div>
       ${manual ? `<p class="ac-note">O botão “${enter}” funciona assim que o acesso for liberado.</p>` : ''}
     </section>
     ${stepsHTML(d)}`);
 
   wireCopy(d, pwd);
+}
+
+// Demonstração (modo demo do servidor): o fluxo foi simulado e NENHUMA conta foi criada no produto.
+function viewDemo(d) {
+  const name = esc(d.productName || 'sistema');
+  const notes = d.notes || d.note || '';
+  render(`
+    <section class="frame frame--glow page-shell__card" data-mode="demo">
+      <div class="ac-head">
+        <span class="page-shell__icon page-shell__icon--warn">${ICONS.warn}</span>
+        <span class="badge badge--warn">Demonstração</span>
+      </div>
+      <h1 class="page-shell__title ac-title">Demonstração concluída — nenhuma conta foi criada</h1>
+      <p class="page-shell__lead">Este ambiente está em <strong>modo demonstração</strong>: o pagamento foi simulado, nenhum valor
+        foi cobrado e <strong>nenhum acesso real ao ${name} foi criado</strong>. Os dados que você preencheu não foram usados para
+        criar empresa nem usuário.</p>
+      ${notes ? `<div class="alert alert--warn" role="note"><div>${esc(notes)}</div></div>` : ''}
+      <dl class="summary ac-summary">
+        ${row('Produto', `${name} · Plano Básico`)}
+        ${d.company ? row('Empresa (informada)', esc(d.company)) : ''}
+        ${d.loginEmail ? row('E-mail informado', `<span class="mono">${esc(d.loginEmail)}</span>`) : ''}
+        ${row('Situação', 'Simulação — sem conta criada')}
+      </dl>
+      <div class="page-shell__actions">
+        ${safeUrl(d.loginUrl) !== '#' ? `<a class="btn btn--primary" href="${esc(safeUrl(d.loginUrl))}">Ver a tela de login do ${name}</a>` : ''}
+        <a class="btn btn--ghost" href="/#planos">Ver planos</a>
+      </div>
+      <p class="ac-note">Para contratar de verdade, assine pelo site em produção — a ativação é imediata após o pagamento aprovado
+        (ou em até 1 dia útil quando a liberação for manual).</p>
+    </section>
+    ${stepsHTML(d)}`);
 }
 
 // ---------------------------------------------------------------- copiar / mostrar
@@ -295,9 +321,13 @@ async function load(token) {
   if (!res.ok || !data.ok) return viewNetworkError(token);
 
   document.title = `Acesso ao ${data.productName} — Aqta`;
+  if (data.mode === 'demo' && data.onboarded !== false) return viewDemo(data);
   if (!data.onboarded) return viewPending(data);
   return viewReady(data);
 }
+
+// Canal de suporte vem do servidor (/api/catalog → support); até lá os links apontam para o contato do site.
+loadSupport().then(() => applySupportLinks(document));
 
 const token = readToken();
 if (!token) viewInvalid('invalid');

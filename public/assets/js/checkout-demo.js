@@ -58,6 +58,9 @@ function fakePixCode(order) {
     + `5802BR5913AQTA DEMO6014RIO DE JANEIRO62290525${id}6304DEMO`;
 }
 
+// O formulário de cartão é só ilustrativo: nunca é enviado (antes era onsubmit="return false", inline — bloqueado pela CSP).
+document.getElementById('cd-card-form')?.addEventListener('submit', (e) => e.preventDefault());
+
 function setupTabs() {
   const tabs = $$('.cd-tab');
   const select = (tab) => {
@@ -135,7 +138,7 @@ async function init() {
 
   fill('productName', order.productName);
   fill('planName', order.planName);
-  fill('billing', `Mensal · renovação a cada ${order.interval}`);
+  fill('billing', `Pré-pago · 1 ${order.interval} de uso (sem renovação automática)`);
   fill('customerName', order.customer?.name || '—');
   fill('customerEmail', order.customer?.email || '—');
   fill('customerCompany', order.customer?.company || '—');

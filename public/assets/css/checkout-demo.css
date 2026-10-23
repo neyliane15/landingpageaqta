@@ -1,0 +1,67 @@
+/* Estilos exclusivos do checkout demo (prefixo .cd-). Componentes base vêm de aqta.css. */
+.cd-banner {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; align-items: center; justify-content: center; gap: .6em;
+  padding: 8px 16px; text-align: center;
+  font: 600 11px/1.4 var(--font-body, Inter, system-ui, sans-serif); letter-spacing: .22em; text-transform: uppercase;
+  color: #05070b; background: repeating-linear-gradient(135deg, #01bffd 0 14px, #00e0ff 14px 28px);
+}
+.cd-banner span { background: #05070b; color: #00e0ff; padding: 2px 8px; border-radius: 3px; letter-spacing: .12em; }
+.cd-wrap { width: min(980px, 100% - 32px); margin: 28px auto 48px; }
+.cd-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
+.cd-head .logo img { height: 34px; width: auto; display: block; }
+.cd-secure { font-size: 12px; color: var(--muted, #8a94a3); display: inline-flex; align-items: center; gap: 6px; }
+.cd-secure svg { width: 14px; height: 14px; color: var(--cyan, #01bffd); }
+.cd-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr); gap: 18px; align-items: start; }
+.cd-card { padding: 22px; }
+.cd-title { font-family: var(--font-display, Michroma, sans-serif); font-size: 15px; letter-spacing: .06em; margin: 6px 0 16px; color: var(--text, #e8edf3); }
+.cd-list { margin: 0; display: grid; gap: 0; font-size: 13px; }
+.cd-list > div { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px dashed rgba(1, 191, 253, .18); }
+.cd-list dt { color: var(--muted, #8a94a3); }
+.cd-list dd { margin: 0; text-align: right; color: var(--text, #e8edf3); overflow-wrap: anywhere; }
+.cd-total { display: flex; justify-content: space-between; align-items: baseline; margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(1, 191, 253, .45); }
+.cd-total span { font-size: 12px; color: var(--muted, #8a94a3); letter-spacing: .2em; text-transform: uppercase; }
+.cd-total strong { font-family: var(--font-display, Michroma, sans-serif); font-size: 20px; color: var(--cyan-glow, #00e0ff); }
+.cd-total small { font-size: 12px; color: var(--muted, #8a94a3); }
+.cd-note { font-size: 12px; color: var(--muted, #8a94a3); margin: 14px 0 0; line-height: 1.55; }
+.cd-tabs { display: flex; gap: 6px; border-bottom: 1px solid rgba(1, 191, 253, .25); margin-bottom: 18px; }
+.cd-tab {
+  appearance: none; background: transparent; border: 1px solid transparent; border-bottom: 0; cursor: pointer;
+  padding: 9px 16px; font: 600 12px/1 var(--font-body, Inter, sans-serif); letter-spacing: .2em; text-transform: uppercase;
+  color: var(--muted, #8a94a3); border-radius: 6px 6px 0 0; position: relative; top: 1px;
+}
+.cd-tab[aria-selected="true"] { color: var(--cyan-glow, #00e0ff); border-color: rgba(1, 191, 253, .45); background: var(--surface-2, #101620); }
+.cd-tab:focus-visible { outline: 2px solid var(--cyan, #01bffd); outline-offset: 2px; }
+.cd-pix { display: grid; grid-template-columns: 168px minmax(0, 1fr); gap: 18px; align-items: start; }
+.cd-qr { position: relative; width: 168px; height: 168px; padding: 10px; background: #fff; border-radius: 6px;
+  box-shadow: 0 0 0 1px rgba(1, 191, 253, .6), 0 0 24px rgba(1, 191, 253, .18); }
+.cd-qr svg { width: 100%; height: 100%; display: block; }
+.cd-qr::after { content: 'DEMO'; position: absolute; inset: auto 0 50% 0; transform: translateY(50%) rotate(-18deg); text-align: center;
+  font: 700 15px/1 var(--font-display, Michroma, sans-serif); letter-spacing: .3em; color: rgba(1, 132, 198, .85); text-shadow: 0 0 6px #fff, 0 0 2px #fff; }
+.cd-steps { margin: 0 0 12px; padding-left: 18px; font-size: 13px; color: var(--muted, #8a94a3); line-height: 1.6; }
+.cd-copy { display: flex; gap: 8px; }
+.cd-copy input { flex: 1; min-width: 0; font: 12px/1.2 ui-monospace, SFMono-Regular, Menlo, monospace; }
+.cd-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.cd-fields .cd-span { grid-column: 1 / -1; }
+.cd-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr)); gap: 10px; margin-top: 20px; padding-top: 18px; border-top: 1px dashed rgba(1, 191, 253, .25); }
+.cd-actions-label { grid-column: 1 / -1; margin: 0 0 2px; }
+.cd-btn-reject { border-color: rgba(255, 92, 92, .55) !important; color: #ff8a8a !important; }
+.cd-state { text-align: center; padding: 48px 22px; }
+.cd-state p { font-size: 14px; color: var(--muted, #8a94a3); }
+.cd-foot { text-align: center; font-size: 12px; color: var(--muted, #8a94a3); margin-top: 22px; }
+[hidden] { display: none !important; }
+/* BUG-3: em tablets (≤ 900px) as duas colunas não cabem; os botões quebram em linhas pelo auto-fit. */
+@media (max-width: 900px) {
+  .cd-grid { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 560px) {
+  .cd-actions { grid-template-columns: minmax(0, 1fr); }
+}
+.cd-actions .btn { min-width: 0; white-space: normal; }
+.cd-foot a { color: var(--muted, #8a94a3); }
+@media (max-width: 460px) {
+  .cd-pix { grid-template-columns: 1fr; justify-items: center; }
+  .cd-fields { grid-template-columns: 1fr; }
+  .cd-card { padding: 18px 16px; }
+  .cd-banner { letter-spacing: .12em; font-size: 10px; }
+}

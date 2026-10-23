@@ -803,6 +803,7 @@ dialog.modal, .modal {
 }
 .page-shell__footer a { color: var(--muted); }
 .page-shell__footer a:hover { color: var(--cyan); }
+.page-shell__legal { display: flex; flex-wrap: wrap; gap: 6px 18px; }
 
 /* ---------- Steps / summary ---------- */
 .steps { list-style: none; padding: 0; display: grid; gap: 14px; counter-reset: aqta-step; }
@@ -875,6 +876,40 @@ dialog.modal, .modal {
   clip: rect(0 0 0 0);
   white-space: nowrap;
   border: 0;
+}
+/* "Pular para o conteúdo" (BUG-6): fora da tela até receber foco; visível no foco (WCAG 2.4.7). */
+.skip-link {
+  position: fixed;
+  left: 12px;
+  top: -64px;
+  z-index: 300;
+  padding: 8px 14px;
+  border-radius: 6px;
+  background: var(--cyan);
+  color: #00131b;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  text-decoration: none;
+  transition: top .2s;
+}
+.skip-link:focus, .skip-link:focus-visible { top: 12px; outline: 2px solid #fff; outline-offset: 2px; text-decoration: none; }
+/* .sr-only focável (ex.: skip-link antigo) também aparece no foco */
+a.sr-only:focus, a.sr-only:focus-visible {
+  position: fixed !important;
+  left: 12px;
+  top: 12px;
+  z-index: 300;
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 8px 14px;
+  clip: auto;
+  overflow: visible;
+  white-space: normal;
+  border-radius: 6px;
+  background: var(--cyan);
+  color: #00131b;
+  font-weight: 600;
 }
 .stack { display: flex; flex-direction: column; gap: var(--stack-gap, 16px); }
 .stack--sm { --stack-gap: 8px; }
