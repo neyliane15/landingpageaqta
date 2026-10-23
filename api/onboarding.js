@@ -20,7 +20,7 @@
 //   resultado (sem senha). Sem armazenamento durável configurado, o provisionamento automático fica DESLIGADO
 //   (tudo vira manual): sem trava entre instâncias, um mesmo pagamento poderia criar várias contas.
 // - O provisionamento automático nunca derruba a venda: qualquer erro vira modo "manual" e a equipe é avisada.
-import { send, allow, readJson, isDemo } from '../lib/http.js';
+import { send, allow, readJson, isDemo, supportWhatsapp } from '../lib/http.js';
 import { getPlan } from '../lib/catalog.js';
 import { signToken, verifyToken } from '../lib/token.js';
 import { notifyTeamInBackground } from '../lib/notify.js';
@@ -170,7 +170,7 @@ function readAccessToken(token) {
 }
 
 function supportWhatsappUrl(text) {
-  const n = onlyDigits(process.env.AQTA_WHATSAPP);
+  const n = supportWhatsapp();
   return n ? `https://wa.me/${n}?text=${encodeURIComponent(text)}` : null;
 }
 

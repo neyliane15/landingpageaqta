@@ -3,7 +3,7 @@
 // Content-Type: application/json obrigatório (415): impede spam por POST text/plain de outros sites.
 // Todo lead também vai para o registro durável (lib/notify.js → lista aqta:events) quando existir.
 // `website` é honeypot: se vier preenchido, responde 200 sem fazer nada (o robô acha que deu certo).
-import { send, allow, readJson } from '../lib/http.js';
+import { send, allow, readJson, supportWhatsapp } from '../lib/http.js';
 import { notifyTeam } from '../lib/notify.js';
 
 const MAX_BODY_CHARS = 6000;
@@ -45,7 +45,7 @@ function rateLimited(req) {
 }
 
 export function whatsappUrlFor(lead) {
-  const n = onlyDigits(process.env.AQTA_WHATSAPP);
+  const n = supportWhatsapp();
   if (!n) return null;
   const text = `Olá, Aqta! Sou ${lead.name}${lead.company ? `, da ${lead.company}` : ''}. `
     + 'Acabei de enviar pelo site um pedido de sistema personalizado e gostaria de conversar sobre o projeto.';
