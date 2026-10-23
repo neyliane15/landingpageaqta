@@ -118,7 +118,7 @@ describe('acessibilidade básica', { skip: browserSkip }, () => {
     test(`/acesso ${product} ativado`, async () => {
       const a = await approvedAccess(srv, product);
       const ob = await srv.request('/api/onboarding', { method: 'POST', body: onboardingInput(a.accessToken, product) });
-      assert.deepEqual(await check(`/acesso?token=${encodeURIComponent(ob.body.accessToken)}`, (page) => page.locator('a', { hasText: 'Entrar no' }).waitFor()), []);
+      assert.deepEqual(await check(`/acesso?token=${encodeURIComponent(ob.body.accessToken)}`, (page) => page.locator('a', { hasText: /Entrar no|Ver a tela de login do/ }).waitFor()), []);
     });
   }
 

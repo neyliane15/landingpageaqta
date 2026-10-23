@@ -23,6 +23,10 @@ async function listen(server) {
   return `http://127.0.0.1:${server.address().port}`;
 }
 
+// Regex de z.string().email() do Zod 3.23 (versão do backend do Emptra).
+export const ZOD_EMAIL = /^(?!\.)(?!.*\.\.)([A-Z0-9_'+\-.]*)[A-Z0-9_+-]@([A-Z0-9][A-Z0-9-]*\.)+[A-Z]{2,}$/i;
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 const closer = (server) => () => new Promise((r) => { server.closeAllConnections?.(); server.close(() => r()); });
 
 /**
@@ -50,7 +54,8 @@ export async function startObtraMock(opts = {}) {
     }
     if (req.method === 'POST' && url.pathname === '/rest/v1/empresas') {
       if (state.opts.failEmpresa) return reply(res, state.opts.failEmpresa.status, state.opts.failEmpresa.body);
-      if (!body?.nome) return reply(res, 400, { code: '23502', message: 'null value in column "nome"' });
+      if (!body?.nome) return reply(res, 400, { code: '23502', message: 'null value in column "nome" of relation "empresas" violates not-null constraint' });
+      if (body.uf != null && String(body.uf).length !== 2) return reply(res, 400, { code: '23514', message: 'new row for relation "empresas" violates check constraint "empresas_uf_check"' });
       const id = randomUUID();
       state.empresas.set(id, body);
       return reply(res, 201, [{ id }]);
@@ -62,11 +67,16 @@ export async function startObtraMock(opts = {}) {
     }
     if (req.method === 'POST' && url.pathname === '/rest/v1/rpc/admin_criar_usuario') {
       if (state.opts.failRpc) return reply(res, state.opts.failRpc.status, state.opts.failRpc.body);
+      // Mesmas checagens e códigos de admin_criar_usuario (instalar.sql): 22023 ⇒ PostgREST 400; 23505 ⇒ 409.
       const b = body || {};
-      if (!b.p_email || !b.p_senha || String(b.p_senha).length < 6 || !b.p_nome) return reply(res, 400, { code: 'P0001', message: 'dados inválidos' });
-      if (!['master', 'admin', 'colaborador', 'cliente'].includes(b.p_papel)) return reply(res, 400, { code: 'P0001', message: 'papel inválido' });
-      if (!state.empresas.has(b.p_empresa_id)) return reply(res, 400, { code: 'P0001', message: 'empresa não encontrada' });
-      if (state.perfis.has(String(b.p_email).toLowerCase())) return reply(res, 400, { code: 'P0001', message: 'E-mail já cadastrado' });
+      const email = String(b.p_email ?? '').trim().toLowerCase();
+      const bad = (message) => reply(res, 400, { code: '22023', details: null, hint: null, message });
+      if (!['master', 'admin', 'colaborador', 'cliente'].includes(b.p_papel)) return bad('Papel inválido');
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return bad('E-mail inválido');
+      if (String(b.p_senha ?? '').length < 6) return bad('A senha deve ter pelo menos 6 caracteres');
+      if (!String(b.p_nome ?? '').trim()) return bad('Informe o nome');
+      if (!state.empresas.has(b.p_empresa_id)) return bad('Empresa não encontrada');
+      if (state.perfis.has(email)) return reply(res, 409, { code: '23505', details: null, hint: null, message: 'E-mail já cadastrado' });
       const id = randomUUID();
       state.perfis.add(String(b.p_email).toLowerCase());
       state.usuarios.push({ id, ...b });
@@ -99,11 +109,14 @@ export async function startEmptraMock(opts = {}) {
     const url = new URL(req.url, 'http://x');
     const body = await readJson(req);
     state.calls.push({ method: req.method, path: url.pathname, query: Object.fromEntries(url.searchParams), headers: req.headers, body });
-    const err = (status, code, message) => reply(res, status, { error: { code, message } });
+    // Formato real (backend/src/middlewares/error.ts): Zod ⇒ 422 VALIDATION_ERROR com details; P2002 ⇒ 409 CONFLICT
+    // "Já existe um registro com este <campo>"; AppError ⇒ status próprio.
+    const err = (status, code, message, details) => reply(res, status, { error: { code, message, ...(details ? { details } : {}) } });
+    const zod = (issues) => err(422, 'VALIDATION_ERROR', 'Dados inválidos', issues);
 
     if (req.method === 'POST' && url.pathname === '/auth/login') {
       if (body?.email !== adminEmail || body?.password !== adminPassword) return err(401, 'INVALID_CREDENTIALS', 'Credenciais inválidas');
-      return reply(res, 200, { accessToken: token, refreshToken: refresh, user: { id: 'adm', email: adminEmail, role: opts.adminRole ?? 'ADMIN' } });
+      return reply(res, 200, { accessToken: token, refreshToken: refresh, user: { id: 'adm', email: adminEmail, role: state.opts.adminRole ?? 'ADMIN' } });
     }
     if (req.method === 'POST' && url.pathname === '/auth/logout') {
       if (body?.refreshToken === refresh) state.loggedOut = true;
@@ -113,15 +126,27 @@ export async function startEmptraMock(opts = {}) {
 
     if (req.method === 'GET' && url.pathname === '/admin/users') {
       const q = (url.searchParams.get('q') || '').toLowerCase();
-      return reply(res, 200, { data: state.users.filter((u) => u.email.toLowerCase().includes(q)), total: 0 });
+      const data = state.users.filter((u) => u.email.toLowerCase().includes(q));
+      return reply(res, 200, { data, meta: { total: data.length, page: 1, perPage: 20, pages: 1 } });
     }
     if (req.method === 'POST' && url.pathname === '/companies') {
       if (state.opts.failCompany) return reply(res, state.opts.failCompany.status, state.opts.failCompany.body);
-      if (!['BUYER', 'SUPPLIER'].includes(body?.type) || !body?.name) return err(400, 'VALIDATION', 'Dados inválidos');
-      if (body.cnpj && [...state.companies.values()].some((c) => c.cnpj === body.cnpj)) return err(409, 'CONFLICT', 'CNPJ já cadastrado');
+      const b = body || {};
+      const issues = [];
+      if (!['BUYER', 'SUPPLIER'].includes(b.type)) issues.push({ field: 'type', message: 'Invalid enum value' });
+      if (typeof b.name !== 'string' || b.name.length < 2) issues.push({ field: 'name', message: 'String must contain at least 2 character(s)' });
+      if (b.email != null && !ZOD_EMAIL.test(String(b.email))) issues.push({ field: 'email', message: 'Invalid email' });
+      if (b.state != null && String(b.state).length > 2) issues.push({ field: 'state', message: 'String must contain at most 2 character(s)' });
+      if (b.profile?.categories !== undefined && (!Array.isArray(b.profile.categories) || b.profile.categories.some((c) => typeof c !== 'string'))) {
+        issues.push({ field: 'profile.categories', message: 'Expected array of strings' });
+      }
+      if (issues.length) return zod(issues);
+      const cnpj = String(b.cnpj ?? '').replace(/\D/g, '') || null;
+      if (cnpj && [...state.companies.values()].some((c) => c.cnpj === cnpj)) return err(409, 'CONFLICT', 'Já existe um registro com este cnpj');
       const id = randomUUID();
-      state.companies.set(id, body);
-      return reply(res, 201, { company: { id, ...body } });
+      const company = { ...b, cnpj };
+      state.companies.set(id, company);
+      return reply(res, 201, { company: { id, ...company } });
     }
     if (req.method === 'DELETE' && url.pathname.startsWith('/companies/')) {
       state.companies.delete(decodeURIComponent(url.pathname.split('/')[2]));
@@ -130,10 +155,19 @@ export async function startEmptraMock(opts = {}) {
     if (req.method === 'POST' && url.pathname === '/admin/users') {
       if (state.opts.failUser) return reply(res, state.opts.failUser.status, state.opts.failUser.body);
       const b = body || {};
-      if (!b.name || String(b.name).length < 3 || !b.email || String(b.password || '').length < 8) return err(400, 'VALIDATION', 'Dados inválidos');
-      if (!['BUYER', 'SUPPLIER'].includes(b.role) || !state.companies.has(b.companyId)) return err(400, 'VALIDATION', 'Empresa/perfil inválido');
-      if (state.users.some((u) => u.email === b.email)) return err(409, 'CONFLICT', 'E-mail já cadastrado');
-      const user = { id: randomUUID(), ...b };
+      const issues = [];
+      if (typeof b.name !== 'string' || b.name.length < 3) issues.push({ field: 'name', message: 'String must contain at least 3 character(s)' });
+      if (typeof b.email !== 'string' || !ZOD_EMAIL.test(b.email)) issues.push({ field: 'email', message: 'Invalid email' });
+      if (typeof b.password !== 'string' || b.password.length < 8) issues.push({ field: 'password', message: 'String must contain at least 8 character(s)' });
+      if (!['ADMIN', 'BUYER', 'SUPPLIER'].includes(b.role)) issues.push({ field: 'role', message: 'Invalid enum value' });
+      if (b.companyId != null && !UUID.test(String(b.companyId))) issues.push({ field: 'companyId', message: 'Invalid uuid' });
+      if (b.status !== undefined && !['PENDING', 'ACTIVE', 'SUSPENDED'].includes(b.status)) issues.push({ field: 'status', message: 'Invalid enum value' });
+      if (issues.length) return zod(issues);
+      if (b.role !== 'ADMIN' && !b.companyId) return err(400, 'BAD_REQUEST', 'Compradores e fornecedores precisam estar vinculados a uma empresa');
+      if (b.companyId && !state.companies.has(b.companyId)) return err(409, 'CONFLICT', 'Registro vinculado a outros dados e não pode ser removido');
+      const email = b.email.toLowerCase().trim();
+      if (state.users.some((u) => u.email.toLowerCase() === email)) return err(409, 'CONFLICT', 'Já existe um registro com este email');
+      const user = { id: randomUUID(), ...b, email, status: b.status ?? 'ACTIVE' };
       state.users.push(user);
       return reply(res, 201, { user: { id: user.id, email: user.email, role: user.role, status: user.status } });
     }

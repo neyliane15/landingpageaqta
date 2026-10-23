@@ -114,6 +114,78 @@ describe('assinatura x-signature', () => {
   });
 });
 
+describe('IPN e idade do ts (REV-9)', () => {
+  test('IPN ?topic=payment&id= SEM x-signature é processado mesmo com MP_WEBHOOK_SECRET (só gatilho; MP reconsultado)', async () => {
+    const id = newPayment();
+    const r = await srv.request(`/api/webhook?topic=payment&id=${id}`, { method: 'POST' });
+    assert.equal(r.status, 200, r.text);
+    assert.equal(r.body.status, 'approved');
+    assert.ok(mock.calls.some((c) => c.url.endsWith(`/v1/payments/${id}`)), 'não reconsultou o MP');
+  });
+
+  test('IPN com x-signature presente e inválida ⇒ 401', async () => {
+    const id = newPayment();
+    const r = await srv.request(`/api/webhook?topic=payment&id=${id}`, { method: 'POST', headers: { 'x-signature': 'ts=1,v1=' + 'b'.repeat(64), 'x-request-id': 'r' } });
+    assert.equal(r.status, 401);
+  });
+
+  test('IPN merchant_order sem assinatura ⇒ 200 ignorado', async () => {
+    const r = await srv.request('/api/webhook?topic=merchant_order&id=123', { method: 'POST' });
+    assert.equal(r.status, 200);
+    assert.ok(r.body.ignored);
+  });
+
+  test('assinatura válida com ts antigo (re-tentativa do MP) é aceita — idade não é motivo de recusa', async () => {
+    const id = newPayment();
+    const rid = 'r-old';
+    const old = String(Math.floor(Date.now() / 1000) - 6 * 3600);
+    const r = await notify(id, { requestId: rid, signature: sign(id, rid, old) });
+    assert.equal(r.status, 200, r.text);
+  });
+});
+
+describe('estorno, chargeback e cancelamento (REV-3)', () => {
+  for (const status of ['refunded', 'charged_back']) {
+    test(`${status} ⇒ equipe avisada uma vez com payment.revoked (ação: revogar acesso)`, async () => {
+      const id = newPayment({ status, status_detail: status, date_approved: '2026-10-01T10:00:00.000-03:00' });
+      const r = await notify(id);
+      assert.equal(r.status, 200, r.text);
+      assert.equal(r.body.revoked, true);
+      const ev = (await cap.waitFor((b) => b.event === 'payment.revoked' && b.paymentId === id)).body;
+      assert.equal(ev.status, status);
+      assert.match(ev.action, /REVOGAR/);
+      assert.match(ev.text, /REVOGAR ACESSO/);
+      assert.equal((await notify(id)).status, 200);
+      await settle();
+      assert.equal(cap.events('payment.revoked').filter((e) => e.paymentId === id).length, 1);
+    });
+  }
+
+  test('cancelled sem ter sido aprovado (PIX/boleto expirado) ⇒ não é revogação', async () => {
+    const id = newPayment({ status: 'cancelled', status_detail: 'expired', date_approved: null });
+    const r = await notify(id);
+    assert.equal(r.status, 200);
+    assert.notEqual(r.body.revoked, true);
+    await settle();
+    assert.equal(cap.events('payment.revoked').length, 0);
+  });
+
+  test('cancelled depois de aprovado ⇒ payment.revoked', async () => {
+    const id = newPayment({ status: 'cancelled', status_detail: 'by_collector', date_approved: '2026-10-01T10:00:00.000-03:00' });
+    const r = await notify(id);
+    assert.equal(r.body.revoked, true);
+    await cap.waitFor((b) => b.event === 'payment.revoked' && b.paymentId === id);
+  });
+
+  test('in_mediation ⇒ equipe avisada (payment.in_mediation), sem revogar', async () => {
+    const id = newPayment({ status: 'in_mediation', status_detail: 'in_process' });
+    const r = await notify(id);
+    assert.equal(r.status, 200);
+    assert.notEqual(r.body.revoked, true);
+    await cap.waitFor((b) => b.event === 'payment.in_mediation' && b.paymentId === id);
+  });
+});
+
 describe('tipos e status', () => {
   for (const type of ['merchant_order', 'subscription_preapproval', 'point_integration_wh', '']) {
     test(`type="${type}" ⇒ 200 ignorado sem consultar o MP`, async () => {

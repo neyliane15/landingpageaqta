@@ -95,3 +95,13 @@ test('rate limit: 6º envio do mesmo IP em 10 min ⇒ 429 com whatsappUrl; outro
   assert.equal((await post(lead(), '192.0.2.78')).status, 200);
 });
 
+
+test('REV-10: POST text/plain (CSRF/spam sem preflight) ⇒ 415 sem notificar; JSON inválido ⇒ 400 invalid_json', async () => {
+  const body = JSON.stringify({ name: 'Spam Bot', email: 'spam@example.com', whatsapp: '21987654321' });
+  const r = await srv.request('/api/lead', { method: 'POST', body, headers: { 'Content-Type': 'text/plain' } });
+  assert.equal(r.status, 415);
+  assert.equal(r.body.error, 'unsupported_media_type');
+  const bad = await srv.request('/api/lead', { method: 'POST', body: '{"name":', headers: { 'Content-Type': 'application/json' } });
+  assert.equal(bad.status, 400);
+  assert.equal(bad.body.error, 'invalid_json');
+});

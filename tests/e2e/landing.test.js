@@ -208,7 +208,8 @@ describe('menu mobile e FAQ', { skip: browserSkip }, () => {
       await page.keyboard.press('ArrowDown');
       assert.equal(await page.evaluate(() => document.activeElement?.id), 'faq-2-q');
       await page.keyboard.press('End');
-      assert.equal(await page.evaluate(() => document.activeElement?.id), 'faq-9-q');
+      const lastId = await page.evaluate(() => [...document.querySelectorAll('[data-faq] .lp-faq__q')].pop().id);
+      assert.equal(await page.evaluate(() => document.activeElement?.id), lastId, 'End vai para a última pergunta');
       await page.keyboard.press('ArrowDown');
       assert.equal(await page.evaluate(() => document.activeElement?.id), 'faq-1-q');
       await page.keyboard.press('Enter');

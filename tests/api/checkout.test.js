@@ -153,6 +153,30 @@ describe('POST /api/checkout — produto/plano, métodos e corpo', () => {
   });
 });
 
+describe('REV-7 / REV-10', () => {
+  test('e-mail com a regra do Zod do Emptra: recusa os que o Emptra recusaria com 422', async () => {
+    for (const email of ['joao.@empresa.com.br', 'a!b@empresa.com', 'ana#1@empresa.com', 'compras{obra}@empresa.com.br', '.ana@empresa.com']) {
+      const r = await srv.request('/api/checkout', { method: 'POST', body: { product: 'obtra', customer: customer({ email }) } });
+      assert.equal(r.status, 400, email);
+      assert.ok(r.body.fields?.email, email);
+    }
+    for (const email of ['ana.silva+obra@empresa.com.br', "o'brien@empresa.com"]) {
+      const r = await srv.request('/api/checkout', { method: 'POST', body: { product: 'obtra', customer: customer({ email }) } });
+      assert.equal(r.status, 200, `${email}: ${r.text}`);
+    }
+  });
+
+  test('POST sem application/json ⇒ 415 (text/plain cross-site não passa)', async () => {
+    const body = JSON.stringify({ product: 'obtra', customer: customer() });
+    for (const ct of ['text/plain', 'application/x-www-form-urlencoded']) {
+      const r = await srv.request('/api/checkout', { method: 'POST', body, headers: { 'Content-Type': ct } });
+      assert.equal(r.status, 415, ct);
+    }
+    const bad = await srv.request('/api/checkout', { method: 'POST', body: '{"product":', headers: { 'Content-Type': 'application/json' } });
+    assert.equal(bad.body.error, 'invalid_json');
+  });
+});
+
 describe('POST /api/checkout — produção simulada (Mercado Pago via fetch mock)', () => {
   test('cria preferência com preço do catálogo, back_urls, notification_url, idempotência e metadata', async () => {
     const restore = patchEnv({ MP_ACCESS_TOKEN: 'TEST-abc', AQTA_TOKEN_SECRET: 's'.repeat(40), PUBLIC_BASE_URL: 'https://aqta.example.com/' });

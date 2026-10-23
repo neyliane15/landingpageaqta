@@ -194,6 +194,7 @@ function publicView(payload) {
     loginEmail: ob.loginEmail || payload.customer?.email || '',
     loginUrl: ob.loginUrl || LOGIN_URLS[product.id](),
     mode,
+    demo: mode === 'demo',
     profile: ob.profile || null,
     manualDeadline: mode === 'manual' ? MANUAL_DEADLINE : null,
     supportWhatsappUrl: supportWhatsappUrl(supportText(product.name, company, mode)),
@@ -206,6 +207,36 @@ function stripMeta(payload) {
   return rest;
 }
 
+// ---------------------------------------------------------------- estado (armazenamento)
+
+/** Revogação e onboarding salvos para o pagamento. Nunca lança (armazenamento fora ⇒ nada conhecido). */
+async function records(key) {
+  const out = { revoked: null, onboarding: null };
+  if (!key || storeMode() === 'none') return out;
+  try {
+    const [revoked, onboarding] = await Promise.all([storeGet(KEYS.revoked(key)), storeGet(KEYS.onboarding(key))]);
+    out.revoked = revoked;
+    out.onboarding = onboarding && typeof onboarding === 'object' ? onboarding : null;
+  } catch (err) {
+    console.error(JSON.stringify({ level: 'error', msg: 'onboarding: armazenamento indisponível na leitura', error: String(err?.message || err) }));
+  }
+  return out;
+}
+
+function notActive(product, company) {
+  const productName = getPlan(product, 'basico')?.product.name || 'produto';
+  return {
+    status: 402,
+    body: {
+      error: 'payment_not_active',
+      message: 'Este pagamento foi estornado, contestado ou cancelado, então o acesso não pode ser ativado. Se acha que é um engano, fale com o suporte.',
+      supportWhatsappUrl: supportWhatsappUrl(`Olá! Meu acesso ao ${productName}${company ? ` (empresa ${company})` : ''} aparece como pagamento não ativo.`),
+    },
+  };
+}
+
+const alreadyDoneFrom = (saved) => ({ status: 200, body: { ...saved.publicResult, alreadyDone: true, accessToken: saved.accessToken } });
+
 // ---------------------------------------------------------------- handlers
 
 async function handleGet(req, res) {
@@ -213,32 +244,64 @@ async function handleGet(req, res) {
   if (!token) return send(res, 401, { error: 'invalid_token' });
   const r = readAccessToken(token);
   if (r.error) return send(res, r.status, { error: r.error });
-  return send(res, 200, publicView(r.payload));
+  const payload = r.payload;
+  const rec = await records(String(payload.paymentId ?? ''));
+  if (rec.revoked) {
+    const out = notActive(payload.product, payload.onboarding?.company || payload.customer?.company);
+    return send(res, out.status, out.body);
+  }
+  if (!payload.onboarded && rec.onboarding?.state === 'done' && rec.onboarding.publicResult) {
+    // Token de ativação antigo, mas o pagamento já foi ativado (talvez em outra instância/aba): mostra o resultado.
+    return send(res, 200, { ...rec.onboarding.publicResult, accessToken: rec.onboarding.accessToken });
+  }
+  return send(res, 200, publicView(payload));
 }
 
-async function runOnboarding(payload, data, extra) {
+const ERROR_NOTES = {
+  email_exists: 'Este e-mail já tem cadastro no sistema: a equipe vai vincular o plano ao acesso existente.',
+  company_exists: 'Este CNPJ já tem empresa cadastrada no sistema: a equipe vai vincular seu acesso à empresa existente.',
+  validation: 'O sistema recusou algum dado informado (por exemplo, o e-mail); a equipe vai conferir e liberar manualmente.',
+};
+
+/**
+ * @param {{ allowAuto: boolean, disabledReason?: string|null }} opts
+ *   allowAuto=false ⇒ não chama os provisionadores (modo manual). No demo eles nunca são chamados.
+ */
+async function runOnboarding(payload, data, extra, { allowAuto, disabledReason = null }) {
   const { product, plan } = getPlan(payload.product, payload.plan || 'basico');
   const input = { product: product.id, plan: plan.id, ...data, extra, paymentId: payload.paymentId };
+  const demo = isDemo();
 
   let result;
   let provisionError = null;
-  try {
-    result = await PROVISIONERS[product.id](input);
-  } catch (err) {
-    provisionError = String(err?.message || err).slice(0, 500);
-    console.error(JSON.stringify({ level: 'error', msg: 'onboarding: provisionamento automático falhou', product: product.id, paymentId: payload.paymentId, code: err?.code, error: provisionError }));
+  if (demo) {
+    // REV-1: nada real é criado no demo, mesmo com OBTRA_* / EMPTRA_* configurados.
+    result = { mode: 'demo', loginUrl: LOGIN_URLS[product.id](), loginEmail: data.loginEmail, profile: extra.profile, notes: DEMO_NOTE };
+  } else if (!allowAuto) {
     result = {
       mode: 'manual',
       loginUrl: LOGIN_URLS[product.id](),
       loginEmail: data.loginEmail,
       profile: extra.profile,
-      notes: err?.code === 'email_exists'
-        ? 'Este e-mail já tem cadastro no sistema: a equipe vai vincular o plano ao acesso existente.'
-        : 'Não foi possível criar o acesso automaticamente; a equipe vai liberar manualmente.',
+      notes: 'A equipe Aqta vai criar o seu acesso e avisar você.',
     };
+  } else {
+    try {
+      result = await PROVISIONERS[product.id](input);
+    } catch (err) {
+      provisionError = String(err?.message || err).slice(0, 500);
+      console.error(JSON.stringify({ level: 'error', msg: 'onboarding: provisionamento automático falhou', product: product.id, paymentId: payload.paymentId, code: err?.code, error: provisionError }));
+      result = {
+        mode: 'manual',
+        loginUrl: LOGIN_URLS[product.id](),
+        loginEmail: data.loginEmail,
+        profile: extra.profile,
+        notes: ERROR_NOTES[err?.code] || 'Não foi possível criar o acesso automaticamente; a equipe vai liberar manualmente.',
+      };
+    }
   }
 
-  const mode = result.mode === 'auto' ? 'auto' : 'manual';
+  const mode = demo ? 'demo' : result.mode === 'auto' ? 'auto' : 'manual';
   const onboarding = {
     mode,
     loginUrl: result.loginUrl || LOGIN_URLS[product.id](),
@@ -257,6 +320,7 @@ async function runOnboarding(payload, data, extra) {
     paymentId: payload.paymentId,
     ref: payload.ref,
     mode,
+    demo,
     manualActionRequired: mode === 'manual',
     company: data.company,
     document: data.document,
@@ -269,6 +333,7 @@ async function runOnboarding(payload, data, extra) {
     notes: result.notes,
     externalIds: result.externalIds,
     ...(provisionError ? { provisionError } : {}),
+    ...(disabledReason ? { autoProvisionDisabled: disabledReason } : {}),
   });
 
   const accessToken = signToken({ ...stripMeta(payload), onboarded: true, onboarding }, ONBOARDED_TTL);
@@ -280,38 +345,111 @@ async function runOnboarding(payload, data, extra) {
   };
 }
 
+/** Todo o fluxo de ativação de um pagamento (depois da validação). Devolve { status, body }. */
+async function activate(key, payload, v) {
+  // 1) Produção: a verdade vem do Mercado Pago (o accessToken vale 7 dias; pode ter havido estorno/chargeback).
+  if (!isDemo()) {
+    const pr = await resolvePayment(key);
+    if (!pr.ok && pr.code === 502) {
+      return { status: 503, body: { error: 'payment_check_failed', message: 'Não conseguimos confirmar o pagamento agora. Tente novamente em alguns minutos.' } };
+    }
+    if (!pr.ok || !isPaymentActive(pr.payment) || pr.payment.product !== payload.product) {
+      console.warn(JSON.stringify({ level: 'warn', msg: 'onboarding recusado: pagamento não ativo', paymentId: key, status: pr.payment?.status, error: pr.error }));
+      return notActive(payload.product, v.data.company);
+    }
+  }
+
+  // 2) Trava por pagamento (vale entre instâncias quando o armazenamento é durável).
+  const mode = storeMode();
+  let locked = false;
+  let disabledReason = null;
+  if (mode === 'none') {
+    disabledReason = 'store_not_configured';
+    console.error(JSON.stringify({ level: 'error', msg: '!!! onboarding: produção SEM armazenamento durável (KV_REST_API_URL/KV_REST_API_TOKEN): provisionamento automático DESLIGADO, ativação vai para a equipe (manual).', paymentId: key }));
+  } else {
+    try {
+      locked = await setIfAbsent(KEYS.onboarding(key), { state: 'in_progress', at: new Date().toISOString() }, LOCK_TTL);
+      if (!locked) {
+        const cur = await storeGet(KEYS.onboarding(key));
+        if (cur?.state === 'done' && cur.publicResult) return alreadyDoneFrom(cur);
+        return { status: 409, body: { error: 'in_progress', message: 'A ativação deste pagamento já está em andamento. Aguarde alguns segundos e recarregue a página.' } };
+      }
+    } catch (err) {
+      disabledReason = 'store_unavailable';
+      console.error(JSON.stringify({ level: 'error', msg: 'onboarding: armazenamento indisponível; provisionamento automático desligado nesta ativação', paymentId: key, error: String(err?.message || err) }));
+    }
+  }
+  const allowAuto = !isDemo() && locked && hasDurableStore();
+
+  // 3) Provisiona (ou não) e guarda o resultado — sem a senha.
+  let out;
+  try {
+    out = await runOnboarding(payload, v.data, v.extra, { allowAuto, disabledReason });
+  } catch (err) {
+    if (locked) await storeDel(KEYS.onboarding(key)).catch(() => {});
+    throw err;
+  }
+  if (locked) {
+    const saved = { state: 'done', publicResult: out.publicResult, accessToken: out.accessToken, at: new Date().toISOString() };
+    let ok = false;
+    for (let i = 0; i < 2 && !ok; i++) {
+      try { await storeSet(KEYS.onboarding(key), saved, RESULT_TTL); ok = true; } catch (err) {
+        console.error(JSON.stringify({ level: 'error', msg: '!!! onboarding: não foi possível gravar o resultado (a trava expira em 10 min)', paymentId: key, error: String(err?.message || err) }));
+      }
+    }
+  }
+  return {
+    status: 200,
+    body: { ...out.publicResult, ...(out.tempPassword ? { tempPassword: out.tempPassword } : {}), accessToken: out.accessToken },
+    saved: { publicResult: out.publicResult, accessToken: out.accessToken },
+  };
+}
+
 async function handlePost(req, res) {
-  const raw = body(req);
-  let size = 0;
-  try { size = JSON.stringify(raw).length; } catch { size = Infinity; }
-  if (size > MAX_BODY_CHARS) return send(res, 413, { error: 'payload_too_large' });
+  const raw = readJson(req, res, { maxChars: MAX_BODY_CHARS }); // 415 / 413 / 400 invalid_json
+  if (!raw) return;
 
   const r = readAccessToken(String(raw.accessToken ?? ''));
   if (r.error) return send(res, r.status, { error: r.error, message: r.error === 'expired_token' ? 'O link de ativação expirou.' : 'Link de ativação inválido.' });
   const payload = r.payload;
+  const key = String(payload.paymentId ?? '');
+  if (!key) return send(res, 401, { error: 'invalid_token', message: 'Link de ativação inválido.' });
 
-  // Já concluído (token novo, devolvido por um onboarding anterior).
+  const rec = await records(key);
+  if (rec.revoked) {
+    const out = notActive(payload.product, payload.onboarding?.company || payload.customer?.company);
+    return send(res, out.status, out.body);
+  }
+
+  // Já concluído: token "onboarded", resultado salvo (qualquer instância) ou cache quente desta instância.
   if (payload.onboarded) {
     return send(res, 200, { ...publicView(payload), alreadyDone: true, accessToken: raw.accessToken });
   }
-  const key = String(payload.paymentId ?? payload.ref ?? '');
-  if (key && done.has(key)) {
-    const prev = done.get(key);
-    return send(res, 200, { ...prev.publicResult, alreadyDone: true, accessToken: prev.accessToken });
+  if (rec.onboarding?.state === 'done' && rec.onboarding.publicResult) {
+    const out = alreadyDoneFrom(rec.onboarding);
+    return send(res, out.status, out.body);
+  }
+  if (done.has(key)) {
+    const out = alreadyDoneFrom(done.get(key));
+    return send(res, out.status, out.body);
   }
 
   const v = validateOnboarding(raw, payload.product);
   if (!v.ok) return send(res, 400, { error: 'validation', fields: v.fields });
 
-  if (key && inflight.has(key)) {
+  if (inflight.has(key)) {
     try {
       const prev = await inflight.get(key);
-      return send(res, 200, { ...prev.publicResult, alreadyDone: true, accessToken: prev.accessToken });
+      if (prev.saved) {
+        const out = alreadyDoneFrom(prev.saved);
+        return send(res, out.status, out.body);
+      }
+      return send(res, prev.status, prev.body);
     } catch { /* cai para nova tentativa */ }
   }
 
-  const job = runOnboarding(payload, v.data, v.extra);
-  if (key) inflight.set(key, job);
+  const job = activate(key, payload, v);
+  inflight.set(key, job);
   let out;
   try {
     out = await job;
@@ -319,18 +457,13 @@ async function handlePost(req, res) {
     console.error('[onboarding] erro inesperado:', err);
     return send(res, 500, { error: 'internal', message: 'Não conseguimos ativar agora. Tente novamente em instantes ou fale com o suporte.' });
   } finally {
-    if (key) inflight.delete(key);
+    inflight.delete(key);
   }
-  if (key) {
-    done.set(key, { publicResult: out.publicResult, accessToken: out.accessToken });
+  if (out.saved) {
+    done.set(key, out.saved);
     if (done.size > 500) done.delete(done.keys().next().value);
   }
-
-  return send(res, 200, {
-    ...out.publicResult,
-    ...(out.tempPassword ? { tempPassword: out.tempPassword } : {}),
-    accessToken: out.accessToken,
-  });
+  return send(res, out.status, out.body);
 }
 
 export default async function handler(req, res) {

@@ -47,3 +47,19 @@ test('HEAD /api/catalog é aceito; POST/PUT/DELETE ⇒ 405 com Allow', async () 
     assert.match(r.headers.get('allow'), /GET/);
   }
 });
+
+test('BUG-5: support vem de AQTA_WHATSAPP (só dígitos + wa.me); null sem configuração', async () => {
+  let r = await srv.request('/api/catalog');
+  assert.equal(r.body.support, null);
+  const restore = patchEnv({ AQTA_WHATSAPP: '+55 (21) 98888-7777' });
+  try {
+    r = await srv.request('/api/catalog');
+    assert.deepEqual(r.body.support, { whatsapp: '5521988887777', whatsappUrl: 'https://wa.me/5521988887777' });
+  } finally { restore(); }
+});
+
+test('emptraCategories: categorias do catálogo do Emptra (slug + nome) para o perfil fornecedor', async () => {
+  const r = await srv.request('/api/catalog');
+  assert.ok(Array.isArray(r.body.emptraCategories) && r.body.emptraCategories.length >= 20);
+  assert.ok(r.body.emptraCategories.some((c) => c.slug === 'hidraulica' && c.name === 'Hidráulica — tubos e conexões'));
+});

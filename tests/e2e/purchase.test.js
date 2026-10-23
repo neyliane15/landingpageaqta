@@ -23,7 +23,7 @@ function assertClean(watch, label) {
 describe('compra aprovada (demo)', { skip: browserSkip }, () => {
   for (const product of ['obtra', 'emptra']) {
     const name = product === 'obtra' ? 'Obtra' : 'Emptra';
-    test(`${name}: landing → checkout demo → aprovado → ativação → /acesso com "Entrar no ${name}" → /entrar`, async () => {
+    test(`${name}: landing → checkout demo → aprovado → ativação → /acesso (Demonstração, nenhuma conta) com "Ver a tela de login do ${name}" → /entrar`, async () => {
       const { page, watch, close } = await newPage(browser, srv.base);
       try {
         await startCheckout(page, srv.base, product);
@@ -45,19 +45,22 @@ describe('compra aprovada (demo)', { skip: browserSkip }, () => {
 
         await activate(page, product);
         assert.equal(new URL(page.url()).pathname, '/acesso');
-        const enter = page.locator('a', { hasText: `Entrar no ${name}` });
+        // modo demo (mode:"demo"): nenhuma conta é criada — a página deixa isso explícito
+        const enter = page.locator('a', { hasText: `Ver a tela de login do ${name}` });
         await enter.waitFor();
         const href = await enter.getAttribute('href');
         assert.match(href, /^https:\/\/.+\/entrar$/, href);
         assert.equal(await enter.getAttribute('target'), null, 'abre na mesma aba');
+        assert.equal(norm(await page.locator('#ac-view .badge').first().textContent()), 'Demonstração');
         const card = norm(await page.locator('#ac-view').textContent());
+        assert.match(card, /nenhuma conta foi criada/i, 'demo explica que nada foi criado');
         assert.match(card, /Construtora E2E Ltda/);
         assert.match(card, /maria\.e2e@example\.com/);
-        assert.match(card, /até 1 dia útil/, 'modo manual (demo) mostra o prazo');
+        assert.doesNotMatch(card, /Acesso liberado|Senha temporária/, 'demo não pode parecer acesso real');
         assert.equal(await page.title(), `Acesso ao ${name} — Aqta`);
         // token guardado na sessão: /acesso sem ?token continua funcionando
         await page.goto(srv.base + '/acesso');
-        await page.locator('a', { hasText: `Entrar no ${name}` }).waitFor();
+        await page.locator('a', { hasText: `Ver a tela de login do ${name}` }).waitFor();
         assertClean(watch, name);
       } finally { await close(); }
     });
