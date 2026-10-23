@@ -17,7 +17,7 @@
 import crypto from 'node:crypto';
 import { send, allow, isDemo } from '../lib/http.js';
 import { resolvePayment } from './payment-status.js';
-import { setIfAbsent, get as storeGet, set as storeSet, storeMode, KEYS } from '../lib/store.js';
+import { setIfAbsent, get as storeGet, set as storeSet, del as storeDel, storeMode, KEYS } from '../lib/store.js';
 
 const MAX_TS_AGE_S = 600;
 const REVOKED_STATUSES = new Set(['refunded', 'charged_back', 'cancelled']);
@@ -40,6 +40,26 @@ async function firstTime(event, paymentId) {
     console.error('[webhook] store indisponível na deduplicação:', err?.message);
     return true;
   }
+}
+
+/** Libera a deduplicação para o próximo reenvio do Mercado Pago tentar avisar de novo. */
+async function forget(event, paymentId) {
+  notified.delete(`${event}:${paymentId}`);
+  if (storeMode() === 'none') return;
+  try { await storeDel(KEYS.notified(event, paymentId)); } catch { /* expira sozinho */ }
+}
+
+/**
+ * Avisa a equipe uma única vez por (evento, pagamento). Se há webhook configurado e a entrega falhou, libera a
+ * deduplicação para a próxima notificação deste pagamento avisar de novo (o evento já ficou em aqta:events).
+ * A resposta ao Mercado Pago continua 200: a falha é do webhook da equipe, não do processamento do pagamento.
+ */
+async function notifyOnce(payload, paymentId) {
+  if (!(await firstTime(payload.event, paymentId))) return true;
+  const ok = await notify(payload);
+  if (ok || !process.env.AQTA_NOTIFY_WEBHOOK) return true;
+  await forget(payload.event, paymentId);
+  return false;
 }
 
 async function notify(event) {
@@ -159,7 +179,7 @@ export default async function handler(req, res) {
   };
 
   if (p.status === 'approved' && !(p.refundedCents > 0)) {
-    if (await firstTime('payment.approved', p.paymentId)) await notify({ event: 'payment.approved', ...base });
+    await notifyOnce({ event: 'payment.approved', ...base }, p.paymentId);
     return send(res, 200, { ok: true, status: p.status });
   }
 
@@ -179,8 +199,7 @@ export default async function handler(req, res) {
         return send(res, 500, { error: 'store_unavailable' }); // MP re-tenta; a revogação não pode se perder
       }
     }
-    if (await firstTime('payment.revoked', p.paymentId)) {
-      await notify({
+    await notifyOnce({
         event: 'payment.revoked',
         ...base,
         status: p.status,
@@ -188,13 +207,12 @@ export default async function handler(req, res) {
         refundedCents: p.refundedCents,
         action: 'REVOGAR/SUSPENDER O ACESSO deste cliente no produto',
         mpAction: base.action,
-      });
-    }
+      }, p.paymentId);
     return send(res, 200, { ok: true, status: p.status, revoked: true });
   }
 
-  if (p.status === 'in_mediation' && await firstTime('payment.in_mediation', p.paymentId)) {
-    await notify({ event: 'payment.in_mediation', ...base, status: p.status, statusDetail: p.statusDetail });
+  if (p.status === 'in_mediation') {
+    await notifyOnce({ event: 'payment.in_mediation', ...base, status: p.status, statusDetail: p.statusDetail }, p.paymentId);
   }
   return send(res, 200, { ok: true, status: p.status });
 }

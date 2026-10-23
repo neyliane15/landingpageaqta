@@ -215,14 +215,24 @@ describe('idempotência (demo, armazenamento em memória)', () => {
     const { accessToken } = await approvedAccess(srv, 'obtra');
     const first = await post(onboardingInput(accessToken));
     assert.equal(first.status, 200);
-    cap.clear();
+    // O aviso da equipe sai em segundo plano (não segura a resposta) e outros testes podem notificar ao mesmo
+    // tempo: conta só os avisos DESTE pagamento.
+    const mine = () => cap.events('onboarding.completed').filter((e) => e.loginEmail === first.body.loginEmail && e.ref === firstRef());
+    let firstRef = () => undefined;
+    for (let i = 0; i < 40 && cap.events('onboarding.completed').filter((e) => e.loginEmail === first.body.loginEmail).length === 0; i++) {
+      await new Promise((r) => setTimeout(r, 50));
+    }
+    const ev = cap.events('onboarding.completed').find((e) => e.loginEmail === first.body.loginEmail);
+    assert.ok(ev, 'o 1º POST notifica a equipe');
+    firstRef = () => ev.ref;
+    assert.equal(mine().length, 1);
     const second = await post(onboardingInput(accessToken, 'obtra', { loginEmail: 'outro@example.com' }));
     assert.equal(second.status, 200);
     assert.equal(second.body.alreadyDone, true);
     assert.equal(second.body.accessToken, first.body.accessToken);
     assert.equal(second.body.loginEmail, first.body.loginEmail, 'não troca o e-mail já ativado');
     await new Promise((r) => setTimeout(r, 150));
-    assert.equal(cap.events('onboarding.completed').length, 0, 'não notifica de novo');
+    assert.equal(mine().length, 1, 'não notifica de novo');
   });
 
   test('POST com o token já "onboarded" ⇒ alreadyDone', async () => {

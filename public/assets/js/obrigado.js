@@ -5,7 +5,7 @@ import { loadSupport, loadCatalog, applySupportLinks, waAttrs } from './support.
 
 const POLL_INTERVAL_MS = 5000;
 const POLL_WINDOW_MS = 10 * 60 * 1000;
-const REQUEST_TIMEOUT_MS = 15000;
+const REQUEST_TIMEOUT_MS = 65000; // maior que o maxDuration de /api/onboarding (60 s)
 const IN_PROGRESS_RETRY_MS = 3000; // 409 in_progress: outra requisição está ativando este pagamento
 const IN_PROGRESS_MAX_RETRIES = 5;
 

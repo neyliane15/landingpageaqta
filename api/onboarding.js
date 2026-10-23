@@ -23,7 +23,7 @@
 import { send, allow, readJson, isDemo } from '../lib/http.js';
 import { getPlan } from '../lib/catalog.js';
 import { signToken, verifyToken } from '../lib/token.js';
-import { notifyTeam } from '../lib/notify.js';
+import { notifyTeamInBackground } from '../lib/notify.js';
 import { provision as provisionObtra, obtraLoginUrl } from '../lib/provision/obtra.js';
 import { provision as provisionEmptra, emptraLoginUrl, normalizeCategories } from '../lib/provision/emptra.js';
 import { setIfAbsent, get as storeGet, set as storeSet, del as storeDel, storeMode, hasDurableStore, KEYS } from '../lib/store.js';
@@ -35,6 +35,9 @@ const LOGIN_URLS = { obtra: obtraLoginUrl, emptra: emptraLoginUrl };
 const ONBOARDED_TTL = 30 * 86400; // a página /acesso continua abrindo por 30 dias
 const MANUAL_DEADLINE = 'até 1 dia útil';
 const MAX_BODY_CHARS = 8192;
+// Orçamento do provisionamento: cabe no maxDuration da função (vercel.json) junto com a consulta ao MP.
+// Estourou ⇒ vira manual e a equipe confere no produto se a conta chegou a ser criada (o resultado fica gravado, sem duplicar).
+const PROVISION_BUDGET_MS = 20000;
 const LOCK_TTL = 10 * 60;          // "em andamento" expira sozinho se a função morrer no meio
 const RESULT_TTL = 400 * 86400;    // resultado guardado por ~13 meses
 const DEMO_NOTE = 'Demonstração: nenhuma conta foi criada.';
@@ -287,7 +290,7 @@ async function runOnboarding(payload, data, extra, { allowAuto, disabledReason =
     };
   } else {
     try {
-      result = await PROVISIONERS[product.id](input);
+      result = await withTimeout(PROVISIONERS[product.id](input), PROVISION_BUDGET_MS);
     } catch (err) {
       provisionError = String(err?.message || err).slice(0, 500);
       console.error(JSON.stringify({ level: 'error', msg: 'onboarding: provisionamento automático falhou', product: product.id, paymentId: payload.paymentId, code: err?.code, error: provisionError }));
@@ -312,7 +315,7 @@ async function runOnboarding(payload, data, extra, { allowAuto, disabledReason =
     at: new Date().toISOString(),
   };
 
-  await notifyTeam({
+  notifyTeamInBackground({
     event: 'onboarding.completed',
     product: product.id,
     productName: product.name,
@@ -343,6 +346,14 @@ async function runOnboarding(payload, data, extra, { allowAuto, disabledReason =
     accessToken,
     tempPassword: mode === 'auto' ? result.tempPassword : undefined,
   };
+}
+
+function withTimeout(promise, ms) {
+  let t;
+  const timeout = new Promise((_, reject) => {
+    t = setTimeout(() => reject(Object.assign(new Error(`provisionamento excedeu ${ms} ms`), { code: 'timeout' })), ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(t));
 }
 
 /** Todo o fluxo de ativação de um pagamento (depois da validação). Devolve { status, body }. */

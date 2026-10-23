@@ -363,3 +363,13 @@ verdade. O que bloqueia a publicação:
 
 Não bloqueiam, mas devem ser feitos em seguida: R2-2, R2-4, demo recusado em `VERCEL_ENV=production`, e conferir o
 HSTS `includeSubDomains` no domínio real.
+
+## Correções após a Rodada 2 (orquestrador)
+
+| Item | Correção |
+| --- | --- |
+| R2-1 (alto) | `api/onboarding.js` não espera mais o webhook da equipe: `notifyTeamInBackground` (lib/notify.js) envia em segundo plano via `waitUntil` da Vercel. Provisionamento limitado a 20 s (`withTimeout`, estouro ⇒ manual com o resultado gravado na trava, sem duplicar). `maxDuration` 60 s e timeout do navegador 65 s em `obrigado.js`. `tests/api/revisao-r2.test.js` passa. |
+| R2-2 (baixo) | `api/webhook.js` → `notifyOnce`: se o webhook da equipe falhar, a deduplicação é liberada para a próxima notificação do mesmo pagamento avisar de novo (o evento já fica em `aqta:events`). A resposta ao MP continua 200. |
+| Layout | Hero: o fato "Ativação" quebrava a borda a 390 px (`white-space: nowrap`); liberado no mobile. |
+
+Resultado: `npm test` 247/247 · `npm run test:e2e` 72/72.

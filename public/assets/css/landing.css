@@ -658,7 +658,7 @@ html { scroll-behavior: smooth; scroll-padding-top: calc(var(--lp-header-h, 64px
   .lp-hero__ctas .btn { flex: 1 1 auto; }
   .lp-hero__facts { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .lp-hero__facts > div { padding: 2px 12px; }
-  .lp-hero__facts dd { font-size: 14px; }
+  .lp-hero__facts dd { font-size: 14px; white-space: normal; }
   .lp-hero__visual { aspect-ratio: 16 / 13; }
   .lp-device--back { width: 82%; }
   .lp-device--front { width: 92%; }

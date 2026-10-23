@@ -69,7 +69,7 @@ describe('CSP do vercel.json', { skip: browserSkip }, () => {
     assert.ok(HEADERS['permissions-policy'], 'Permissions-Policy');
     assert.equal(vercel.outputDirectory, 'public');
     assert.equal(vercel.cleanUrls, true);
-    assert.equal(vercel.functions?.['api/*.js']?.maxDuration, 30);
+    assert.equal(vercel.functions?.['api/*.js']?.maxDuration, 60);
   });
 
   test('páginas estáticas carregam sem violar a CSP (inclui JSON-LD, fontes e WhatsApp dinâmico)', async () => {
