@@ -99,13 +99,13 @@ function head(kind, badge, title) {
     <h1 class="page-shell__title ac-title">${title}</h1>`;
 }
 
-function stepsHTML(d) {
+function stepsHTML(d, { demo = false } = {}) {
   const list = d.product === 'obtra' ? STEPS.obtra() : STEPS[d.profile === 'fornecedor' ? 'fornecedor' : 'comprador']();
   const who = d.product === 'emptra' ? ` · ${d.profile === 'fornecedor' ? 'Fornecedor' : 'Comprador'}` : '';
   return `
     <section class="frame page-shell__card" aria-labelledby="ac-steps-title">
       <p class="eyebrow">Primeiros passos${esc(who)}</p>
-      <h2 class="ac-h2" id="ac-steps-title">Comece a usar o ${esc(d.productName)}</h2>
+      <h2 class="ac-h2" id="ac-steps-title">${demo ? `Como é o primeiro uso do ${esc(d.productName)} (após a contratação real)` : `Comece a usar o ${esc(d.productName)}`}</h2>
       <ol class="steps">
         ${list.map(([t, txt]) => `<li><strong>${esc(t)}</strong>${txt}</li>`).join('')}
       </ol>
@@ -128,6 +128,20 @@ function viewInvalid(kind) {
       <div class="page-shell__actions">
         <a class="btn btn--primary" ${waAttrs('Olá! Preciso de ajuda com o link de acesso ao meu sistema Aqta.')}>Falar com o suporte</a>
         <a class="btn btn--ghost" href="/">Voltar ao site</a>
+      </div>
+    </section>`);
+}
+
+function viewRevoked(d) {
+  setProgressWait();
+  render(`
+    <section class="frame page-shell__card">
+      ${head('err', 'Pagamento estornado', 'Este acesso não está mais ativo')}
+      <p class="page-shell__lead">${esc(d.message || 'O pagamento deste acesso foi reembolsado, estornado ou contestado junto ao Mercado Pago, por isso o acesso foi desativado.')}
+        Se acha que é um engano, fale com o suporte; para voltar a usar, faça uma nova contratação.</p>
+      <div class="page-shell__actions">
+        <a class="btn btn--primary" href="/#planos">Ver planos</a>
+        <a class="btn btn--ghost" ${waAttrs('Olá! Meu acesso a um sistema Aqta aparece como estornado. Podem verificar?')}>Falar com o suporte</a>
       </div>
     </section>`);
 }
@@ -247,7 +261,7 @@ function viewDemo(d) {
       <p class="ac-note">Para contratar de verdade, assine pelo site em produção — a ativação é imediata após o pagamento aprovado
         (ou em até 1 dia útil quando a liberação for manual).</p>
     </section>
-    ${stepsHTML(d)}`);
+    ${stepsHTML(d, { demo: true })}`);
 }
 
 // ---------------------------------------------------------------- copiar / mostrar
@@ -318,10 +332,15 @@ async function load(token) {
     storage('aqta.access', null);
     return viewInvalid(data.error === 'expired_token' ? 'expired' : 'invalid');
   }
+  if (res.status === 402 || data.error === 'payment_not_active') {
+    storage('aqta.access', null);
+    storage('aqta.tempPassword', null);
+    return viewRevoked(data);
+  }
   if (!res.ok || !data.ok) return viewNetworkError(token);
 
   document.title = `Acesso ao ${data.productName} — Aqta`;
-  if (data.mode === 'demo' && data.onboarded !== false) return viewDemo(data);
+  if ((data.mode === 'demo' || data.demo === true) && data.onboarded !== false) return viewDemo(data);
   if (!data.onboarded) return viewPending(data);
   return viewReady(data);
 }

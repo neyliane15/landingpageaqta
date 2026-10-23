@@ -1,7 +1,7 @@
 // Página /obrigado — retorno do pagamento (Mercado Pago ou gateway demo) e ativação do acesso.
 // Máquina de estados: loading → approved | pending | rejected | error.
 // A verdade vem sempre de GET /api/payment-status (nunca do ?status= da URL de retorno).
-import { loadSupport, applySupportLinks, waAttrs } from './support.js';
+import { loadSupport, loadCatalog, applySupportLinks, waAttrs } from './support.js';
 
 const POLL_INTERVAL_MS = 5000;
 const POLL_WINDOW_MS = 10 * 60 * 1000;
@@ -179,6 +179,12 @@ function activationFormHTML(d, product) {
         </div>
         <p class="field-error" id="err-perfil" data-error-for="perfil"></p>
       </fieldset>
+      <fieldset class="ob-fieldset form-grid__full" id="f-categorias" hidden aria-describedby="hint-categorias">
+        <legend>Categorias que você fornece</legend>
+        <small class="field-hint" id="hint-categorias">As cotações chegam para os fornecedores das categorias escolhidas — marque todas as que você atende.</small>
+        <div class="ob-cats" data-cats><span class="ob-note">Carregando categorias…</span></div>
+        <p class="field-error" id="err-categories" data-error-for="categories"></p>
+      </fieldset>
       <div class="ob-city form-grid__full">
         <div class="field">
           <label for="f-cidade">Cidade de atuação</label>
@@ -337,6 +343,27 @@ function renderRejected(d) {
     </div>`, { announce: `${title}. ${reason}` });
 }
 
+function renderRevoked(d) {
+  stopPolling();
+  setSteps('err');
+  const title = 'Pagamento estornado — acesso não disponível';
+  render(`
+    <div class="ob-head">
+      <div class="page-shell__icon page-shell__icon--err" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 12a8 8 0 1 0 2.3-5.6M4 4v4h4"/></svg></div>
+      <span class="badge badge--err">Estornado</span>
+      <h1 class="page-shell__title" id="ob-title" tabindex="-1">${title}</h1>
+      <p class="page-shell__lead">Este pagamento foi reembolsado, estornado ou contestado junto ao Mercado Pago, por isso não
+        há acesso a ativar por este link. Se acha que é um engano, fale com o suporte; para voltar a usar, faça uma nova contratação.</p>
+    </div>
+    ${d.product ? summaryHTML(d) : ''}
+    <div class="ob-center">
+      <div class="page-shell__actions">
+        <a class="btn btn--primary" href="/#planos">Ver planos</a>
+        <a class="btn btn--ghost" ${waAttrs(`Olá! Meu pagamento do ${d.productName || 'sistema Aqta'} aparece como estornado. Podem verificar?`)}>Falar com o suporte</a>
+      </div>
+    </div>`, { announce: title });
+}
+
 // ---------------------------------------------------------------- polling (pendente)
 
 function startPolling() {
@@ -472,6 +499,21 @@ async function refresh({ silent = false } = {}) {
   const kind = classify(d.status);
   const prevKind = current ? classify(current.status) : null;
   current = d;
+  if (d.revoked) {
+    // estornado/contestado/cancelado depois de aprovado: sem ativação (o servidor não emite accessToken)
+    storage('aqta.access', null);
+    renderRevoked(d);
+    return 'rejected';
+  }
+  if (kind === 'approved' && d.onboarded && d.accessToken) {
+    // este pagamento já foi ativado: vai direto para os dados de acesso (não oferece o formulário de novo)
+    stopPolling();
+    storage('aqta.access', d.accessToken);
+    setSteps('done', 'done', 'current');
+    renderLoading('Pagamento já ativado — abrindo seus dados de acesso…');
+    location.replace(`/acesso?token=${encodeURIComponent(d.accessToken)}`);
+    return 'approved';
+  }
   if (kind === 'approved') {
     if (!d.accessToken) {
       renderError({ title: 'Pagamento aprovado, ativação indisponível', message: 'Recebemos seu pagamento, mas não conseguimos gerar o link de ativação. Fale com o suporte — liberamos seu acesso rapidamente.' });
@@ -590,11 +632,31 @@ function showErrors(form, errors) {
   return first;
 }
 
+// Emptra · fornecedor: categorias atendidas (GET /api/catalog → emptraCategories [{ slug, name }]) → extra.categories
+function wireCategories(form) {
+  const box = form.querySelector('#f-categorias');
+  const list = box?.querySelector('[data-cats]');
+  if (!box || !list) return;
+  const sync = () => { box.hidden = form.querySelector('input[name="perfil"]:checked')?.value !== 'fornecedor'; };
+  form.querySelectorAll('input[name="perfil"]').forEach((r) => r.addEventListener('change', sync));
+  sync();
+  loadCatalog().then((cat) => {
+    const cats = Array.isArray(cat?.emptraCategories) ? cat.emptraCategories.filter((c) => c && c.slug && c.name) : [];
+    if (!cats.length) {
+      list.innerHTML = '<span class="ob-note">Não foi possível carregar as categorias agora. Você pode escolhê-las depois, no seu perfil do Emptra.</span>';
+      return;
+    }
+    list.innerHTML = cats.map((c, i) => `
+      <label class="ob-cat" for="f-cat-${i}"><input type="checkbox" id="f-cat-${i}" name="categories" value="${esc(c.slug)}"><span>${esc(c.name)}</span></label>`).join('');
+  });
+}
+
 function wireForm(d, product) {
   const form = document.getElementById('ob-form');
   const docInput = form.elements.document;
   const waInput = form.elements.whatsapp;
   docInput.addEventListener('input', () => { docInput.value = maskDocument(docInput.value); });
+  if (product === 'emptra') wireCategories(form);
   waInput.addEventListener('input', () => { waInput.value = maskPhone(waInput.value); });
 
   // limpa o erro de um campo assim que o usuário o corrige
@@ -620,6 +682,9 @@ function wireForm(d, product) {
     const extra = product === 'emptra'
       ? { perfil: form.querySelector('input[name="perfil"]:checked').value, cidade: v('cidade'), uf: v('uf') }
       : { obrasAtivas: v('obrasAtivas'), cidade: v('cidade'), uf: v('uf') };
+    if (product === 'emptra' && extra.perfil === 'fornecedor') {
+      extra.categories = [...form.querySelectorAll('input[name="categories"]:checked')].map((i) => i.value);
+    }
     const payload = {
       accessToken: d.accessToken,
       company: v('company'),
@@ -677,12 +742,14 @@ function wireForm(d, product) {
       return;
     }
     if (res.status === 402 || r.error === 'payment_not_active') {
-      msg = 'Este pagamento não está mais ativo (foi reembolsado, estornado ou contestado), então não é possível ativar o acesso. Se acha que é um engano, fale com o suporte.';
+      msg = r.message || 'Este pagamento não está mais ativo (foi reembolsado, estornado ou contestado), então não é possível ativar o acesso. Se acha que é um engano, fale com o suporte.';
       btn.disabled = true;
       btn.setAttribute('aria-disabled', 'true');
       setSteps('err', 'err');
     } else if (res.status === 409 && r.error === 'in_progress') {
       msg = 'A ativação ainda está em andamento. Aguarde alguns segundos e toque em “Ativar meu acesso” de novo — não haverá cobrança em dobro.';
+    } else if (res.status === 503 || r.error === 'payment_check_failed') {
+      msg = r.message || 'Não conseguimos confirmar o pagamento agora. Tente novamente em instantes — seus dados não se perdem.';
     } else if (res.status === 415) {
       msg = 'Não conseguimos enviar os dados. Atualize a página e tente novamente.';
     } else if (res.status === 401 || res.status === 403 || r.error === 'invalid_token' || r.error === 'expired_token') {

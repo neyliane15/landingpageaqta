@@ -66,15 +66,24 @@ describe('compra aprovada (demo)', { skip: browserSkip }, () => {
     });
   }
 
-  test('voltar ao /obrigado depois de ativar e reenviar ⇒ vai direto para /acesso (alreadyDone)', async () => {
+  test('voltar ao /obrigado depois de ativar ⇒ payment-status onboarded: vai direto para /acesso, sem novo formulário', async () => {
     const { page, close } = await newPage(browser, srv.base);
     try {
       await startCheckout(page, srv.base, 'obtra');
       await payDemo(page, 'approved');
       const obrigado = page.url();
       await activate(page, 'obtra');
-      await page.goto(obrigado);
-      await activate(page, 'obtra', { loginEmail: 'outro.email@example.com' });
+      // marca (na sessão da aba) se o formulário de ativação chegar a aparecer no /obrigado
+      await page.addInitScript(() => {
+        if (location.pathname !== '/obrigado') return;
+        new MutationObserver(() => {
+          if (document.getElementById('ob-form')) sessionStorage.setItem('e2e.formShown', '1');
+        }).observe(document, { childList: true, subtree: true });
+      });
+      await page.goto(obrigado, { waitUntil: 'commit' });
+      await page.waitForURL(/\/acesso\?token=/);
+      await page.locator('.ac-title').waitFor({ state: 'visible' });
+      assert.equal(await page.evaluate(() => sessionStorage.getItem('e2e.formShown')), null, 'o formulário de ativação não pode reaparecer');
       const text = norm(await page.locator('#ac-view').textContent());
       assert.match(text, /maria\.e2e@example\.com/, 'mantém o e-mail da primeira ativação');
     } finally { await close(); }

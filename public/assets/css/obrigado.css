@@ -115,3 +115,17 @@
 }
 .ob-note--center { text-align: center; }
 .ob-note a { color: var(--cyan); }
+
+/* Emptra · fornecedor: categorias (seleção múltipla) */
+.ob-cats { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(180px, 100%), 1fr)); gap: 8px; }
+.ob-cat { position: relative; display: block; cursor: pointer; }
+.ob-cat input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.ob-cat span { display: block; padding: 9px 12px 9px 34px; position: relative; font-size: 13px; color: var(--text);
+  border: 1px solid var(--line-strong, #2a3646); border-radius: 6px; background: linear-gradient(180deg, #070a10, #090d14);
+  transition: border-color .2s, box-shadow .2s; }
+.ob-cat span::before { content: ""; position: absolute; left: 12px; top: 50%; width: 13px; height: 13px; margin-top: -7px;
+  border: 1px solid var(--line-strong, #2a3646); border-radius: 3px; box-sizing: border-box; }
+.ob-cat:hover span { border-color: #374659; }
+.ob-cat input:checked + span { border-color: var(--cyan); box-shadow: 0 0 0 1px var(--cyan) inset; }
+.ob-cat input:checked + span::before { background: var(--cyan); border-color: var(--cyan); box-shadow: 0 0 8px rgba(1, 191, 253, .6); }
+.ob-cat input:focus-visible + span { outline: 2px solid var(--cyan); outline-offset: 2px; }

@@ -9,8 +9,19 @@
 export const FALLBACK = '/#sob-medida';
 const WA_RE = /^https:\/\/(wa\.me|api\.whatsapp\.com)\//;
 
+let catalogPromise = null;
 let promise = null;
 let base = null; // "https://wa.me/55…" ou null
+
+/** GET /api/catalog (uma vez por página). Resolve com o JSON ou {} — nunca rejeita. */
+export function loadCatalog() {
+  if (!catalogPromise) {
+    catalogPromise = fetch('/api/catalog', { headers: { Accept: 'application/json' } })
+      .then((r) => (r.ok ? r.json() : {}))
+      .catch(() => ({}));
+  }
+  return catalogPromise;
+}
 
 function baseFrom(support) {
   if (!support || typeof support !== 'object') return null;
@@ -24,9 +35,8 @@ function baseFrom(support) {
 /** Carrega (uma vez) o canal de suporte. Resolve com a URL base do WhatsApp ou null. Nunca rejeita. */
 export function loadSupport() {
   if (!promise) {
-    promise = fetch('/api/catalog', { headers: { Accept: 'application/json' } })
-      .then((r) => (r.ok ? r.json() : {}))
-      .then((data) => { base = baseFrom(data.support); return base; })
+    promise = loadCatalog()
+      .then((data) => { base = baseFrom(data?.support); return base; })
       .catch(() => { base = null; return null; });
   }
   return promise;
