@@ -257,3 +257,109 @@ Legenda: **CRÍTICO** bloqueia a publicação · **ALTO** corrigir antes de ir a
 10. **Baixos:** BUG-6, BUG-10, BUG-1 (Node 20), BUG-3, BUG-7, REV-8, REV-10, REV-12. Na suíte: S1-S10 (em especial
     trocar `static.test.js` por uma checagem do `.vercelignore`, deixar os mocks do Emptra rígidos e fazer o e2e
     falhar no CI quando não houver Chromium).
+
+---
+
+# Rodada 2 (23/10/2026) — conferência das correções
+
+Revisei o código atual: commits `375ec8f`, `1d7c123`, `af9c31a` e `9e0bb84`, com estáticos em `public/`,
+`lib/store.js` (Upstash), modo demo sem provisionamento, CSP e páginas de termos e privacidade.
+
+**Suítes:**
+- `npm test`: 246/246, sem contar `tests/api/revisao-r2.test.js`, que é novo e falha de propósito.
+- `npm run test:e2e`: 72/72.
+- Meus testes da rodada 1 (`tests/api/revisao.test.js`) passam todos. O REV-4 foi reescrito pelo orquestrador para
+  checar `outputDirectory`. A nova versão é válida e mais forte que a minha.
+
+## Veredito por item
+
+| Item | Situação | Comentário |
+| --- | --- | --- |
+| BUG-1 | **Corrigido** | `engines >=22`, que suporta o glob entre aspas. |
+| BUG-2 | **Corrigido, se o KV estiver configurado** | Trava `SET NX EX` em `aqta:onboarding:<paymentId>` (`api/onboarding.js:362-381`). Sem KV em produção, o provisionamento automático é desligado e tudo vai para o modo manual (`:366-368`). Isso fecha a falha com segurança. Risco residual em R2-1 e R2-4. |
+| BUG-3 | Corrigido | Coberto pelo e2e de 768 px. |
+| BUG-4 | Corrigido | Coberto pelo e2e. |
+| BUG-5 | **Corrigido** | Nenhum número fixo. `support.js` lê `/api/catalog → support`; sem número, o link cai em `/#sob-medida`. Pendência do cliente: definir `AQTA_WHATSAPP`. |
+| BUG-6 | Corrigido | `.skip-link`. |
+| BUG-7 | **Não corrigido** | `api/demo-pay.js:71` continua sem documento. Baixo, só afeta o demo. Pode ficar. |
+| BUG-8 | **Parcial** | "Ativação imediata após o pagamento aprovado" (`index.html:17,599`) só vale com KV e credenciais de provisionamento. Em modo manual o prazo é "até 1 dia útil". Pendência: só publicar esse texto com o modo auto ativo, ou trocá-lo. |
+| BUG-9 | **Parcial: pendência do cliente** | `/termos` e `/privacidade` existem e estão linkados no rodapé e no modal. CNPJ, endereço e e-mail do encarregado estão **vazios** (`termos.html:63-68`, `privacidade.html:59-65`). Isso bloqueia a publicação: é exigência legal. |
+| BUG-10 | **Pendência do cliente** | Continua relativo, com `<!-- PREENCHER: domínio -->` em `index.html:10`. |
+| REV-1 | **Corrigido** | `runOnboarding` não chama os provisionadores no demo (`onboarding.js:277-279`), e cada `provision()` tem a mesma trava (defesa em profundidade). O segredo do demo é recusado em produção (`lib/token.js:11`). Residual baixo: o demo ainda é implícito (sem token = demo), então um deploy de produção sem `MP_ACCESS_TOKEN` vira uma loja de demonstração. Não cria contas, mas sugiro recusar o demo quando `VERCEL_ENV=production`. |
+| REV-2 | **Resolvido no texto; o processo é pendência do cliente** | O plano agora é apresentado como "pré-pago, sem renovação automática" de forma coerente (FAQ, modal, termos, checkout demo). Falta processo, ver R2-3. |
+| REV-3 | **Corrigido** | O onboarding reconsulta o MP (`onboarding.js:351-360`, status `approved` e `refundedCents == 0`). O webhook avisa e grava `revoked` para `refunded`, `charged_back`, `cancelled`-depois-de-aprovado e estorno parcial. `payment-status` não emite token para pagamento revogado. A suspensão no produto continua manual (a equipe recebe `payment.revoked`). |
+| REV-4 | **Corrigido** | `outputDirectory: public`. O `server.js` local serve só `public/`. `vercel.json` é válido: `functions["api/*.js"].maxDuration`, sem `buildCommand`; com o preset "Other" e sem script de build, a Vercel publica `public/` e empacota `api/*.js` rastreando `../lib`. Confirme no primeiro deploy com `vercel build` (ver `.vercel/output/functions`). |
+| REV-5 | **Parcial** | Agora há 3 tentativas e uma cópia durável em `aqta:events` (LPUSH/LTRIM) quando o KV existe. Ressalvas: (a) sem webhook **e** sem KV em produção, a venda ainda responde "ok" e o evento só existe no log. A falha não é fechada como sugerido; deixe isso no checklist de deploy, porque o KV já é exigido para o modo auto. (b) Ninguém lê `aqta:events`: não há tela nem endpoint, então é preciso usar o console do Upstash. (c) As tentativas criaram a regressão R2-1. |
+| REV-6 | **Corrigido, com KV** | `payment-status` devolve `onboarded:true` e o token salvo quando o pagamento já foi ativado (`payment-status.js:197-203`). |
+| REV-7 | **Corrigido** | `isValidEmail` usa a regra do Zod 3.23. 409 com e-mail vira `email_exists`, 409 com CNPJ vira `company_exists`, 422 vira `validation`. As 27 categorias de `EMPTRA_CATEGORIES` batem com `backend/src/data/catalogo.ts` (conferi os nomes). O mock agora responde 422/409 como a API real. |
+| REV-8 | Corrigido | `cnpj` só recebe 14 dígitos (`obtra.js:138`). |
+| REV-9 | **Corrigido** | IPN sem assinatura é aceito. Efeito colateral aceitável: qualquer pessoa pode disparar uma reconsulta ao MP mandando `?topic=payment&id=`. Não há forja, porque a verdade vem do MP. |
+| REV-10 | **Corrigido** | `readJson` exige `application/json` (415) e protege o getter da Vercel. `maxDuration` 30 s. O `PUBLIC_BASE_URL` ainda é opcional: deixe no checklist. |
+| REV-11 | Corrigido | Os links de WhatsApp são configuráveis, e o 429 do lead mostra o WhatsApp. |
+| REV-12 | **Corrigido** | A CSP é estrita (sem `unsafe-inline`). Os estilos inline viraram CSS e só sobra CSSOM (`el.style.x`), que a CSP permite. O JSON-LD não é executado. O `csp.test.js` injeta os cabeçalhos do `vercel.json` no navegador e não houve violação em nenhuma página ou estado. Observação: `Strict-Transport-Security; includeSubDomains` só deve ir ao ar se todos os subdomínios do domínio do cliente tiverem HTTPS. |
+
+## Novos achados da rodada 2
+
+### R2-1 — ALTO (regressão das tentativas do REV-5): a senha temporária se perde quando o webhook da equipe está lento
+- **Onde:** `api/onboarding.js:315-337` **aguarda** `notifyTeam` antes de responder. `lib/notify.js` agora faz até 3
+  tentativas × 4 s, mais 1,2 s de backoff, ou seja, ~13,2 s. O navegador aborta em 15 s
+  (`public/assets/js/obrigado.js:8`, `REQUEST_TIMEOUT_MS`).
+- **Efeito:** com n8n/Make lento ou fora do ar, a conta é criada no Obtra ou no Emptra. Somando a consulta ao MP e as
+  chamadas reais ao Supabase/Emptra (login e criação de usuário com bcrypt), a resposta passa de 15 s. O cliente vê
+  "Sem conexão" e, ao tentar de novo, recebe `alreadyDone` **sem `tempPassword`**, porque ela não é guardada, por
+  desenho. No Emptra não há "esqueci a senha": o cliente depende do suporte. O mesmo atraso pesa no `/api/lead` e no
+  webhook do MP.
+- **Prova:** `tests/api/revisao-r2.test.js`. Com o webhook da equipe travado, o `POST /api/onboarding` levou **13 246 ms**
+  usando mocks instantâneos.
+- **Correção:** tirar a notificação do caminho crítico. Opções:
+  1. Gravar o evento em `aqta:events` (rápido) e mandar o webhook com `waitUntil` de `@vercel/functions` (ou sem
+     `await`, com Fluid Compute).
+  2. Uma única tentativa com timeout de 2 s na requisição do cliente, deixando as outras tentativas para o webhook do
+     MP ou um cron.
+
+  Em paralelo, subir `REQUEST_TIMEOUT_MS` do onboarding para ≥ 35 s (acima do `maxDuration`). Também vale um
+  orçamento total de tempo no provisionamento: hoje são até 5 × 10 s no Emptra e 3 × 10 s no Obtra, acima dos 30 s do
+  `maxDuration`. Se a função morrer depois de criar a conta e antes de gravar `done`, a trava expira em 10 min e um
+  novo envio cria outra conta (o BUG-2 volta pela porta dos fundos).
+
+### R2-2 — BAIXO: deduplicação do webhook marcada antes do aviso ser entregue
+- **Onde:** `api/webhook.js:31-44`. `firstTime()` grava `aqta:notified:*` **antes** de `notify()`. Se o webhook da equipe
+  falhar nas 3 tentativas, o handler responde 200 e as próximas entregas do MP são consideradas "já avisadas". Isso é
+  grave para `payment.revoked`, que pede ação: "revogar acesso".
+- **Atenuante:** com KV, o evento fica em `aqta:events`.
+- **Correção:** apagar a marca e responder 500 quando `notify()` devolver `false`, para o MP tentar de novo.
+
+### R2-3 — MÉDIO, processo (pendência do cliente): a renovação do pré-pago não tem fluxo
+- O FAQ (`index.html:581`) manda renovar "pelo mesmo botão de assinatura". Isso gera um pagamento novo, com
+  `paymentId` novo e um **formulário de ativação novo**:
+  - Com o mesmo e-mail de login, cai no modo manual com "e-mail já tem cadastro… a equipe vai vincular". Funciona, mas
+    soa como erro para quem só quis renovar.
+  - Com outro e-mail, cria uma **segunda empresa**.
+- Nenhuma notificação diz até quando o mês está pago (`date_approved + 1 mês`), e nada suspende o acesso no vencimento.
+- **Correção mínima:**
+  1. Incluir `paidUntil` em `payment.approved` e `onboarding.completed`.
+  2. No `/obrigado`, quando o e-mail já existir, mostrar "Renovação registrada" em vez do formulário de ativação.
+  3. Documentar a rotina da equipe para lembrar o cliente do vencimento e suspender o acesso.
+
+### R2-4 — BAIXO: o token "onboarded" salvo dura 30 dias, mas o registro dura 400
+- **Onde:** `api/onboarding.js:35,396`. Depois de 30 dias, `alreadyDone` e `payment-status` devolvem um `accessToken`
+  vencido e o `/acesso` mostra "link expirado". Isso só afeta quem volta pelo link antigo.
+- **Correção:** re-assinar o token salvo ao devolvê-lo, já que o registro no KV é a fonte da verdade.
+
+## Aprovado para produção?
+
+**Ainda não.** O código está muito melhor: todos os riscos de dinheiro e segurança da rodada 1 foram fechados de
+verdade. O que bloqueia a publicação:
+
+1. **R2-1:** tirar `notifyTeam` do caminho crítico da ativação, ou pelo menos limitar o tempo e subir o timeout do
+   front. Hoje, com o webhook da equipe lento, o cliente perde a senha temporária.
+2. **Pendências do cliente, obrigatórias para publicar:**
+   - CNPJ, endereço e e-mail do encarregado em `/termos` e `/privacidade` (BUG-9).
+   - Domínio final nas meta tags OG e `canonical` (BUG-10).
+   - Variáveis de ambiente: `AQTA_WHATSAPP`, `MP_ACCESS_TOKEN`, `AQTA_TOKEN_SECRET`, `MP_WEBHOOK_SECRET`,
+     `PUBLIC_BASE_URL`, `KV_REST_API_URL`/`KV_REST_API_TOKEN` e `AQTA_NOTIFY_WEBHOOK`. Sem KV, tudo fica manual e o
+     texto "ativação imediata" fica falso (BUG-8).
+   - Decidir e documentar o processo de renovação e suspensão (R2-3).
+
+Não bloqueiam, mas devem ser feitos em seguida: R2-2, R2-4, demo recusado em `VERCEL_ENV=production`, e conferir o
+HSTS `includeSubDomains` no domínio real.
